@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}player overview{% endblock %}
+
+{% block content %}
+<h1>Player</h1>
+<button onclick="location.href='/new-player'" class="btn btn-primary" type="button">New player</button>
+<p><b>Existing Players</b></p>
+<ul>
+{% for player in players %}
+  <li>
+    <a href="/player/{{ player.id }}">{{ player.name }}</a>
+  </li>
+{% endfor %}
+</ul>
+{% endblock %}

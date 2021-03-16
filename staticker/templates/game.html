@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Game{% endblock %}
+
+{% block content %}
+<p><b>Black</b></p>
+{% if game.black.mode == "single" %}
+<p>SIN 0/0/0</p>
+{% else %}
+<p>DEF 0/0/0</p>
+<p>OFF 0/0/0</p>
+{% endif %}
+<p></p>
+<p><b>White</b></p>
+{% if game.white.mode == "single" %}
+<p>SIN 0/0/0</p>
+{% else %}
+<p>DEF 0/0/0</p>
+<p>OFF 0/0/0</p>
+{% endif %}
+{% endblock %}
