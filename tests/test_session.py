@@ -1,62 +1,80 @@
-import unittest
 from staticker.session import Session
 from staticker.game import Game
 from staticker.player import Player
 from staticker.time import Time
+import pytest
 
-class TestSession(unittest.TestCase):
+@pytest.fixture()
+def setup():
+    session = Session()
+    games = [Game() for _ in range(10)]
+    players = [Player() for _ in range(10)]
+    return session, games, players
 
-    def setUp(self):
-        self.session = Session()
-        self.games = [Game() for _ in range(10)]
-        self.players = [Player() for _ in range(10)]
-
-    def test_defaults(self):
-        self.assertEqual(type(self.session.time), Time)
-        
-    def test_add(self):
-        def run_tests():
-            for g in self.games:
-                self.assertIn(g.id, self.session.games)
-            for p in self.players:
-                self.assertIn(p.id, self.session.players)
-            self.assertEqual(len(self.session.games), len(self.games))
-            self.assertEqual(len(self.session.players), len(self.players))
-        
-        # TypeErrors
-        self.assertRaises(TypeError, self.session.add_games, self.games[0])
-        self.assertRaises(TypeError, self.session.add_players, self.players[0])
-        
-        # Add to session
-        self.session.add_games(self.games)
-        self.session.add_players(self.players)
-        run_tests()
-        
-        # Should not be added, because already added
-        self.session.add_games(self.games)
-        self.session.add_players(self.players)
-        run_tests()
-        
-    def test_dump_and_load(self):
-        self.session.add_games(self.games)
-        self.session.add_players(self.players)
-        self.session.set_mode("free")
-        self.session.set_playto(10)
-        self.session.dump()
-        
-        session = Session()
-        session.load(self.session.id)
-        
-        self.assertEqual(self.session, session)
-        
-    def test_playto(self):
-        self.assertRaises(TypeError, self.session.set_playto, "str")
-        playto = 10
-        self.session.set_playto(playto)
-        self.assertEqual(self.session.playto, playto)
-        
-    def test_mode(self):
-        self.assertRaises(TypeError, self.session.set_mode, 42)
-        self.assertRaises(ValueError, self.session.set_mode, "str")
-        
+def test_defaults(setup):
+    session, games, players = setup
+    assert type(session.time) == Time
+    
+def test_add(setup):
+    def run_tests(session, games, players):
+        for g in games:
+            assert g.id in session.game_ids
+        for p in players:
+            assert p.id in session.player_ids
+        assert len(session.game_ids) == len(games)
+        assert len(session.player_ids) == len(players)
+    
+    session, games, players = setup
+    
+    # TypeErrors
+    with pytest.raises(TypeError):
+        session.add_games(games[0])
+    with pytest.raises(TypeError):
+        session.add_players(players[0])
+    
+    # Add to session
+    session.add_games(games)
+    session.add_players(players)
+    run_tests(session, games, players)
+    
+    # Should not be added, because already added
+    session.add_games(games)
+    session.add_players(players)
+    run_tests(session, games, players)
+    
+def test_dump_and_load(setup):
+    session, games, players = setup
+    
+    session.add_games(games)
+    session.add_players(players)
+    session.set_mode("free")
+    session.set_playto(10)
+    
+    for p in players:
+        p.dump()
+    for g in games:
+        g.dump()
+    session.dump()  
+    
+    s = Session()
+    s.load(session.id)
+    
+    assert s == session
+    
+def test_playto(setup):
+    session, games, players = setup
+    
+    with pytest.raises(TypeError):
+        session.set_playto("str")
+    playto = 10
+    session.set_playto(playto)
+    assert session.playto == playto
+    
+def test_mode(setup):
+    session, games, players = setup
+    
+    with pytest.raises(TypeError):
+        session.set_mode(42)
+    with pytest.raises(ValueError):
+        session.set_mode("str")
     

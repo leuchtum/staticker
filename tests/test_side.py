@@ -1,119 +1,95 @@
-import unittest
 from staticker.player import Player
 from staticker.game import Game, Slot, Side
+import pytest
 
-class SidePlayer(unittest.TestCase):
+@pytest.fixture()
+def setup():
+    game = Game()
+    
+    p1 = Player()
+    p1.set_name("P1")
 
-    def setUp(self):
-        self.side = Side()
+    p2 = Player()
+    p2.set_name("P2")
 
-    def test_init(self):
-        self.assertIs(self.side._mode , None)
-        self.assertIs(self.side.single , None)
-        self.assertIs(self.side.defense , None)
-        self.assertIs(self.side.offense , None)
+    p3 = Player()
+    p3.set_name("P3")
 
-    def test_set_player(self):
-        p1 = Player()
-        p1.set_name("P1")
+    game.black.set_player([p1])
+    game.white.set_player([p2, p3])
 
-        p2 = Player()
-        p2.set_name("P2")
+    playto = 10
+    game.set_playto(playto)
+    
+    return game, playto, p1, p2, p3
 
-        p3 = Player()
-        p3.set_name("P3")
+def test_init():
+    side = Side()
+    
+    assert side._mode is None
+    assert side.single is None
+    assert side.defense is None
+    assert side.offense is None
 
-        game = Game() # Order is important
-        game.black.set_player([p1])
-        game.white.set_player([p2, p3])
+def test_set_player(setup):
+    game, playto, p1, p2, p3 = setup 
+    
+    # Order is important
+    game.black.set_player([p1])
+    game.white.set_player([p2, p3])
 
-        self.assertIs(type(game.black.single), Slot)
-        self.assertIs(game.black.defense, None)
-        self.assertIs(game.black.offense, None)
+    assert type(game.black.single) is Slot
+    assert game.black.defense is None
+    assert game.black.offense is None
 
-        self.assertIs(game.white.single, None)
-        self.assertIs(type(game.white.defense), Slot)
-        self.assertIs(type(game.white.offense), Slot)
+    assert game.white.single is None
+    assert type(game.white.defense) is Slot
+    assert type(game.white.offense) is Slot
 
-        self.assertIs(game.black._mode, "single")
-        self.assertIs(game.white._mode, "multi")
+    assert game.black._mode is "single"
+    assert game.white._mode is "multi"
 
-    def test_set_playto(self):
-        p1 = Player()
-        p1.set_name("P1")
+def test_get_goals_owners_fouls(setup):
+    game, playto, p1, p2, p3 = setup 
+    
+    # Order is important
+    game.black.set_player([p1])
+    game.white.set_player([p2, p3])
 
-        p2 = Player()
-        p2.set_name("P2")
+    playto = 10
+    game.set_playto(playto)
 
-        p3 = Player()
-        p3.set_name("P3")
+    game.black.single.add_goal()
+    game.black.single.add_owner()
+    game.black.single.add_foul()
 
-        game = Game() # Order is important
-        game.black.set_player([p1])
-        game.white.set_player([p2, p3])
+    game.white.defense.add_goal()
+    game.white.defense.add_owner()
+    game.white.defense.add_foul()
 
-        playto = 10
-        game.set_playto(playto)
+    game.white.offense.add_goal()
+    game.white.offense.add_owner()
+    game.white.offense.add_foul()
 
-        self.assertEqual(game.black.single._playto, playto)
-        self.assertEqual(game.white.defense._playto, playto)
-        self.assertEqual(game.white.offense._playto, playto)
+    assert game.black.get_goals() == 1
+    assert game.black.get_owners() == 1
+    assert game.black.get_fouls() == 1
 
-    def test_get_goals_owners_fouls(self):
-        p1 = Player()
-        p1.set_name("P1")
+    assert game.white.get_goals() == 2
+    assert game.white.get_owners() == 2
+    assert game.white.get_fouls() == 2
 
-        p2 = Player()
-        p2.set_name("P2")
+def test_flip_slots(setup):
+    game, playto, p1, p2, p3 = setup 
+    
+    #Order is important
+    game.black.set_player([p1])
+    game.white.set_player([p2, p3])
 
-        p3 = Player()
-        p3.set_name("P3")
+    slot1 = game.white.defense
+    slot2 = game.white.offense
 
-        game = Game() # Order is important
-        game.black.set_player([p1])
-        game.white.set_player([p2, p3])
+    game.white.flip_slots()
 
-        playto = 10
-        game.set_playto(playto)
-
-        game.black.single.add_goal()
-        game.black.single.add_owner()
-        game.black.single.add_foul()
-
-        game.white.defense.add_goal()
-        game.white.defense.add_owner()
-        game.white.defense.add_foul()
-
-        game.white.offense.add_goal()
-        game.white.offense.add_owner()
-        game.white.offense.add_foul()
-
-        self.assertEqual(game.black.get_goals(), 1)
-        self.assertEqual(game.black.get_owners(), 1)
-        self.assertEqual(game.black.get_fouls(), 1)
-
-        self.assertEqual(game.white.get_goals(), 2)
-        self.assertEqual(game.white.get_owners(), 2)
-        self.assertEqual(game.white.get_fouls(), 2)
-
-    def test_flip_slots(self):
-        p1 = Player()
-        p1.set_name("P1")
-
-        p2 = Player()
-        p2.set_name("P2")
-
-        p3 = Player()
-        p3.set_name("P3")
-
-        game = Game() # Order is important
-        game.black.set_player([p1])
-        game.white.set_player([p2, p3])
-
-        slot1 = game.white.defense
-        slot2 = game.white.offense
-
-        game.white.flip_slots()
-
-        self.assertIs(game.white.defense, slot2)
-        self.assertIs(game.white.offense, slot1)
+    assert game.white.defense is slot2
+    assert game.white.offense is slot1

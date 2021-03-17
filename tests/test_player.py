@@ -1,53 +1,58 @@
-import unittest
 from staticker.player import Player
+import pytest
 
-class TestPlayer(unittest.TestCase):
+@pytest.fixture()
+def setup():
+    name = "TESTNAME"
+    game_id = "TEST_ID"
+    
+    player = Player()
+    player.set_name(name)
+    player.add_game(game_id)
+    
+    return player, name, game_id
 
-    def setUp(self):
-        self.player = Player()
+def test_default_values(setup):
+    player, name, game_id = setup
 
-    def test_default_values(self):
-        self.assertNotEqual(len(self.player.id), 0)
-        self.assertIs(self.player.name, None)
-        self.assertEqual(len(self.player.games), 0)
-        self.assertEqual(self.player._tablename, "player")
+    assert len(player.id) != 0
+    assert player._tablename == "player"
 
-    def test_set_name(self):
-        name = "TESTNAME"
-        self.player.set_name(name)
-        self.assertEqual(name, self.player.name)
-        with self.assertRaises(TypeError):
-            self.player.set_name(999)
+def test_set_name(setup):
+    player, name, game_id = setup
+    
+    name = "TESTNAME"
+    player.set_name(name)
+    assert name == player.name
+    with pytest.raises(TypeError):
+        player.set_name(999)
 
-    def test_add_game(self):
-        game_id = "TEST_ID"
-        self.player.add_game(game_id)
-        self.assertTrue(game_id in self.player.games)
-        with self.assertRaises(TypeError):
-            self.player.add_game(999)
+def test_add_game(setup):
+    player, name, game_id = setup
+    
+    assert game_id in player.games
+    with pytest.raises(TypeError):
+        player.add_game(999)
 
-    def test_del_game(self):
-        game_id = "TEST_ID"
-        self.player.add_game(game_id)
-        self.assertTrue(game_id in self.player.games)
-        self.player.del_game(game_id)
-        self.assertFalse(game_id in self.player.games)
-        with self.assertRaises(TypeError):
-            self.player.add_game(999)
+def test_del_game(setup):
+    player, name, game_id = setup
 
-    def test_dump_and_load(self):
-        name = "TESTNAME"
-        game_id = "TEST_ID"
+    assert game_id in player.games
+    player.del_game(game_id)
+    assert game_id not in player.games
+    with pytest.raises(TypeError):
+        player.add_game(999)
 
-        self.player.set_name(name)
-        self.player.add_game(game_id)
-        self.player.dump()
+def test_dump_and_load(setup):
+    player, name, game_id = setup
+    
+    player.dump()
 
-        p = Player()
-        p.load(self.player.id)
+    p = Player()
+    p.load(player.id)
 
-        self.assertEqual(p.id, self.player.id)
-        self.assertEqual(p.name, self.player.name)
-        self.assertEqual(p.games, self.player.games)
-        with self.assertRaises(TypeError):
-            self.player.load(999)
+    assert p.id == player.id
+    assert p.name == player.name
+    assert p.games == player.games
+    with pytest.raises(TypeError):
+        player.load(999)

@@ -155,6 +155,9 @@ class SingleBase:
     def load(self, obj_id):
         h = Handler()
         dic = h.load_one(self._tablename, obj_id)
+        if not dic:
+            msg = f"No object in table {self._tablename.upper()} with ID={obj_id} found."
+            raise TypeError(msg)
         self.__init__(**dic)
 
 #################################################
