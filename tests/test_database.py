@@ -1,1 +1,0 @@
-#TODO Implement: db_obj.load("UNKNOWN_ID") should raise error
