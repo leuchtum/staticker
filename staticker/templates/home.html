@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Home page</h1>
+{% if active_event %}
+<div class="alert alert-warning alert-dismissible" role="alert">
+    <h4 class="alert-heading">There is an active event!</h4>
+    Click <a href="/event/{{ active_event.id }}" class="alert-link">here</a> to show active event.
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
+{% if active_game %}
+<div class="alert alert-warning alert-dismissible" role="alert">
+    <h4 class="alert-heading">There is an active game!</h4>
+    Click <a href="/game/{{ active_game.id }}" class="alert-link">here</a> to show active
+    game.
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
+{% endblock %}

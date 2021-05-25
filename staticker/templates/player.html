@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Player {{ player.name }}{% endblock %}
+
+{% block content %}
+{% if alert %}
+<div class="alert alert-success alert-dismissible" role="alert">
+    <h4 class="alert-heading">Player created</h4>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
+<p><b>Player {{ player.name }}</b></p>
+<p>ID: {{ player.id }}</p>
+<p></p>
+<p>Played games:</p>
+<ul>
+    {% for g in player.played_games() %}
+    <li><a href="/game/{{ g.id }}">{{ g.id }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

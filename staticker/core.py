@@ -248,11 +248,27 @@ def get_game_by_id(game_id):
         raise(Exception(f"No game with id {game_id} found."))
 
 
+def get_multiple_games_by_id(game_ids):
+    try:
+        return [g for g in Game.select().where(Game.id << game_ids)]
+    except:
+        raise(Exception(f"No games with given ID's found."))
+
+###############################
+
+
 def get_player_by_id(player_id):
     try:
         return Player[player_id]
     except:
         raise(Exception(f"No player with id {player_id} found."))
+
+
+def get_multiple_player_by_id(player_ids):
+    try:
+        return [p for p in Player.select().where(Player.id << player_ids)]
+    except:
+        raise(Exception(f"No player with given ID's found."))
 
 
 def get_player_by_name(player_name):
@@ -262,8 +278,24 @@ def get_player_by_name(player_name):
         raise(Exception(f"No player with name {player_name} found."))
 
 
-def get_multiple_games_by_id(game_ids):
+def get_multiple_player_by_name(player_names):
     try:
-        return [g for g in Game.select().where(Game.id << game_ids)]
+        return [p for p in Player.select().where(Player.name << player_names)]
     except:
-        raise(Exception(f"No games with given ID's found."))
+        raise(Exception(f"No players with given names found."))
+
+
+###############################
+
+def get_event_by_id(event_id):
+    try:
+        return Event[event_id]
+    except:
+        raise(Exception(f"No event with id {event_id} found."))
+
+
+def get_multiple_events_by_id(event_ids):
+    try:
+        return [ev for ev in Event.select().where(Event.id << event_ids)]
+    except:
+        raise(Exception(f"No events with given ID's found."))
