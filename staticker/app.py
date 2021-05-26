@@ -6,14 +6,14 @@ import starlette.status as status
 from . import core
 from .collections import PlayerCollection, EventCollection
 from .manager import manager
-
+from.communication import ArduinoAsyncSerial
 
 ##############################################################
 
 
-active_event = None
-active_game = None
-
+arduino = ArduinoAsyncSerial()
+arduino.register_read_process(print)
+# arduino.register_write_process(print)
 
 ##############################################################
 
@@ -22,11 +22,16 @@ async def not_found(_, exc):
     with open("staticker/templates/404.html") as f:
         content = f.read()
         return HTMLResponse(content, status_code=exc.status_code)
-    
+
 exceptions = {404: not_found}
 app = FastAPI(exception_handlers=exceptions)
 app.mount("/static", StaticFiles(directory="staticker/static"), name="static")
 templates = Jinja2Templates(directory="staticker/templates")
+
+
+@app.on_event("startup")
+async def startup_event():
+    arduino.start_listen()
 
 
 ##############################################################
@@ -58,7 +63,7 @@ async def app_events_overview(request: Request):
     dic = {
         "request": request,
         "events": ec.get_events(),
-        "active_event":manager.get_active_event()
+        "active_event": manager.get_active_event()
     }
     return templates.TemplateResponse("events-overview.html", dic)
 
