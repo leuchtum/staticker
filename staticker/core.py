@@ -19,36 +19,83 @@ class BaseModel(Model):
 
 
 class Event(BaseModel):
+    created = DateTimeField(default=datetime.now)
     mode = CharField()
     elements = JSONField(default={"p": [], "g": []})
+    active = BooleanField(default=False)
 
     def add_player(self, player):
-        for p in player:
-            if p.id not in self.elements["p"]:
-                self.elements["p"].append(p.id)
+        if self._is_active():
+            for p in player:
+                if p.id not in self.elements["p"]:
+                    self.elements["p"].append(p.id)
 
-        self.save()
+            self.save()
 
     def add_game(self, game):
-        if self.mode == "free":
-            existing_games = get_multiple_games_by_id(self.elements["g"])
-            for g in existing_games:
-                if not g.finished:
-                    msg = (
-                        "Attempted to add a new game, "
-                        f"although game with id {g.id} "
-                        "has not yet been finished."
-                    )
-                    raise(Exception(msg))
+        if not game.id:
+            msg = (
+                "Game has no ID and cannot be added to event."
+            )
+            raise Exception(msg)
 
-            for pid in game.get_player_ids():
-                if pid not in self.elements["p"]:
-                    msg = f"Player with id {pid} not in this event."
-                    raise(Exception(msg))
+        if self._is_active():
+            if self.mode == "free":
+                existing_games = get_multiple_games_by_id(self.elements["g"])
+                for g in existing_games:
+                    if not g.finished:
+                        msg = (
+                            "Attempted to add a new game, "
+                            f"although game with id {g.id} "
+                            "has not yet been finished."
+                        )
+                        raise(Exception(msg))
 
-            self.elements["g"].append(game.id)
+                for pid in game.get_player_ids():
+                    if pid not in self.elements["p"]:
+                        msg = f"Player with id {pid} not in this event."
+                        raise(Exception(msg))
 
-        self.save()
+                self.elements["g"].append(game.id)
+
+            self.save()
+
+    def _is_active(self):
+        if self.active:
+            return True
+        else:
+            raise(Exception("Event is not active."))
+
+    def activate(self):
+        if not self.active:
+            active_ev_ids = [
+                ev.id for ev in Event.select().where(Event.active == True)]
+            active_ev_ids = [evid for evid in active_ev_ids if evid != self.id]
+            if active_ev_ids:
+                msg = (
+                    "Can not activate event, "
+                    "because there exists an active event "
+                    f"with ID {active_ev_ids[0]}."
+                )
+                raise(Exception(msg))
+            self.active = True
+            self.save()
+
+    def deactivate(self):
+        games = self.get_active_game()
+        if games:
+            msg = (
+                "Event can not be deactivated, because "
+                f"there is an active game with ID {games[0]}"
+            )
+            raise(Exception(msg))
+        else:
+            self.active = False
+            self.save()
+
+    def get_active_game(self):
+        games = get_multiple_games_by_id(self.elements["g"])
+        return [g for g in games if g.finished == False]
 
 
 #################################################################

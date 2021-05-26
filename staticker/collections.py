@@ -1,4 +1,5 @@
 from .core import Event, Player, get_player_by_id, get_player_by_name
+from peewee import fn
 
 
 class PlayerCollection:
@@ -9,7 +10,7 @@ class PlayerCollection:
         if sort_by is None:
             self.player = [p for p in Player.select()]
         elif sort_by == "name":
-            self.player = [p for p in Player.select().order_by(Player.name)]
+            self.player = [p for p in Player.select().order_by(fn.Lower(Player.name))]
 
     def get_names(self):
         return [p.name for p in self.player]

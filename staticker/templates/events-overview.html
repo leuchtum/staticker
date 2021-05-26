@@ -3,11 +3,20 @@
 {% block title %}events overview{% endblock %}
 
 {% block content %}
+{% if active_event %}
+<div class="alert alert-warning alert-dismissible" role="alert">
+    <h4 class="alert-heading">There is an active event!</h4>
+    Click <a href="/event/{{ active_event.id }}" class="alert-link">here</a> to show active event.
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
 <h1>Events</h1>
 <ul>
   {% for ev in events %}
   <li>
-    <a href="/event/{{ ev.id }}">{{ ev.id }}</a>
+    <a href="/event/{{ ev.id }}">Event | Type: {{ ev.mode }} | from {{ ev.created.date() }}</a>
   </li>
   {% endfor %}
 </ul>

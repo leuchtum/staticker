@@ -58,6 +58,7 @@ def play_synthetic_event(n_player, n_games):
             player.append(p)
 
     ev = Event(mode="free")
+    ev.activate()
     ev.add_player(player)
 
     for _ in range(n_games):
@@ -84,6 +85,7 @@ def play_synthetic_event(n_player, n_games):
                 g.owner(side, slot)
         
         print(f"Ev: {ev.id} | Game: {g.id}")
+    ev.deactivate()
 
 
 if __name__ == '__main__':
