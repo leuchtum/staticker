@@ -4,7 +4,7 @@ bool serial_input_string_complete = false;
 
 //
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   // reserve 200 bytes for the serial_input_string:
   serial_input_string.reserve(200);
 }
