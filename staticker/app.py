@@ -33,6 +33,10 @@ templates = Jinja2Templates(directory="staticker/templates")
 async def startup_event():
     arduino.start_listen()
 
+@app.get("/debug")
+async def debug():
+    await arduino._write("!101!")
+    return {}
 
 ##############################################################
 
