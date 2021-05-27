@@ -1,6 +1,20 @@
 from asyncio import get_event_loop
 from serial_asyncio import open_serial_connection
 
+'''
+Spezification protocoll:
+
+    Message composition:
+        !X_M!
+        
+    !: Start and and characters
+    X: Mode indentifier [0:9]
+    _: Delimiter
+    Start msg: !
+    Mode
+    End msg: !
+    
+'''
 
 class ArduinoAsyncSerial:
     def __init__(self):
@@ -24,7 +38,14 @@ class ArduinoAsyncSerial:
             except:
                 dic = None
             if dic:
-                self._exec_read_process(dic)
+                await self._exec_read_process(dic)
+
+    async def _write(self, string):
+        try:
+            b = string.encode() + b''
+            self.writer.write(b)
+        except Exception as e:
+            raise e
 
     def register_read_process(self, callable):
         self.read_process = callable
@@ -32,7 +53,7 @@ class ArduinoAsyncSerial:
     def register_write_process(self, callable):
         self.write_process = callable
 
-    def _exec_read_process(self, dic):
+    async def _exec_read_process(self, dic):
         self.read_process(dic)
 
     def decode(self, string):
