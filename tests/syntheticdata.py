@@ -67,8 +67,8 @@ def play_synthetic_event(n_player, n_games):
 
         equals = True
         while equals:
-            p_b = random.choices(player, k=n_b)
-            p_w = random.choices(player, k=n_w)
+            p_b = random.sample(player, n_b)
+            p_w = random.sample(player, n_w)
             equals = any(p in p_w for p in p_b)
 
         g = Game()

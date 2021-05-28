@@ -11,8 +11,8 @@
 <p>Black: {{ game.get_score()["b"] }}</p>
 <p>White: {{ game.get_score()["w"] }}</p>
 <p><b>Player</b></p>
-<p>Black defense: {{ game.player_b_def.name }}</p>
-<p>Black offense: {{ game.player_b_off.name }}</p>
-<p>White defense: {{ game.player_w_def.name }}</p>
-<p>White offense: {{ game.player_w_off.name }}</p>
+<p>Black defense: {{ game.pbd.name }}</p>
+<p>Black offense: {{ game.pbo.name }}</p>
+<p>White defense: {{ game.pwd.name }}</p>
+<p>White offense: {{ game.pwo.name }}</p>
 {% endblock %}

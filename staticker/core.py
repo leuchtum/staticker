@@ -106,14 +106,26 @@ class Player(BaseModel):
     name = CharField(unique=True)
     created = DateTimeField(default=datetime.now)
 
-    def played_games(self):
+    def played_games(self, position=("d", "o"), side=("w", "b"), mode=("m", "s")):
         query = Game.select().where(
-            (Game.player_b_def == self) |
-            (Game.player_b_off == self) |
-            (Game.player_w_def == self) |
-            (Game.player_w_off == self)
-        ).order_by(Game.id)
-        return [p for p in query]
+            (Game.pbd == self) |
+            (Game.pbo == self) |
+            (Game.pwd == self) |
+            (Game.pwo == self)
+        )
+        all_games = [p for p in query.order_by(Game.id)]
+
+        return_games = []
+        for g in all_games:
+            expression = (
+                (g.get_position_by_player(self) in position) &
+                (g.get_side_by_player(self) in side) &
+                (g.get_mode_by_player(self) in mode)
+            )
+            if expression:
+                return_games.append(g)
+
+        return return_games
 
 
 #################################################################
@@ -121,51 +133,52 @@ class Player(BaseModel):
 
 
 class Game(BaseModel):
+    # General information
     created = DateTimeField(default=datetime.now)
-    mode = CharField(default="")
-    playto = IntegerField(default=6)
     started = BooleanField(default=False)
     finished = BooleanField(default=False)
+    # Player information
+    single_b = BooleanField()
+    single_w = BooleanField()
+    pbd = ForeignKeyField(Player)
+    pbo = ForeignKeyField(Player)
+    pwd = ForeignKeyField(Player)
+    pwo = ForeignKeyField(Player)
+    # Game information
+    playto = IntegerField(default=6)
     history = CharField(default="")
-    player_b_def = ForeignKeyField(Player, backref="b_def")
-    player_b_off = ForeignKeyField(Player, backref="b_off")
-    player_w_def = ForeignKeyField(Player, backref="w_def")
-    player_w_off = ForeignKeyField(Player, backref="w_off")
 
     def add_player(self, black, white):
         assert type(black) == list
         assert type(white) == list
         assert any(p in white for p in black) == False
 
-        mode = ""
-
+        # Add black players
         if len(black) == 1:
-            self.player_b_def = black[0]
-            self.player_b_off = black[0]
-            mode += "1b"
+            self.pbd = black[0]
+            self.pbo = black[0]
+            self.single_b = True
         elif len(black) == 2:
-            self.player_b_def = black[0]
-            self.player_b_off = black[1]
-            mode += "2b"
+            self.pbd = black[0]
+            self.pbo = black[1]
+            self.single_b = False
         else:
             msg = "Length of black must equals 1 or 2"
             raise(Exception(msg))
 
-        mode += "_"
-
+        # Add white players
         if len(white) == 1:
-            self.player_w_def = white[0]
-            self.player_w_off = white[0]
-            mode += "1w"
+            self.pwd = white[0]
+            self.pwo = white[0]
+            self.single_w = True
         elif len(white) == 2:
-            self.player_w_def = white[0]
-            self.player_w_off = white[1]
-            mode += "2w"
+            self.pwd = white[0]
+            self.pwo = white[1]
+            self.single_w = False
         else:
             msg = "Length of white must equals 1 or 2"
             raise(Exception(msg))
 
-        self.mode = mode
         self.save()
 
     def goal(self, side, slot):
@@ -242,15 +255,19 @@ class Game(BaseModel):
         if self.started:
             raise(Exception("Unable to switch sides, game has already started."))
 
-        pbd = self.player_b_def
-        pbo = self.player_b_off
-        pwd = self.player_w_def
-        pwo = self.player_w_off
+        pbd = self.pbd
+        pbo = self.pbo
+        pwd = self.pwd
+        pwo = self.pwo
+        sb = self.single_b
+        sw = self.single_w
 
-        self.player_b_def = pwd
-        self.player_b_off = pwo
-        self.player_w_def = pbd
-        self.player_w_off = pbo
+        self.pbd = pwd
+        self.pbo = pwo
+        self.pwd = pbd
+        self.pwo = pbo
+        self.single_b = sw
+        self.single_w = sb
 
         self.save()
 
@@ -258,27 +275,48 @@ class Game(BaseModel):
         if self.started:
             raise(Exception("Unable to switch slots, game has already started."))
 
-        pbd = self.player_b_def
-        pbo = self.player_b_off
-        pwd = self.player_w_def
-        pwo = self.player_w_off
+        pbd = self.pbd
+        pbo = self.pbo
+        pwd = self.pwd
+        pwo = self.pwo
 
         if side == "b":
-            self.player_b_def = pbo
-            self.player_b_off = pbd
+            self.pbd = pbo
+            self.pbo = pbd
         elif side == "w":
-            self.player_w_def = pwo
-            self.player_w_off = pwd
+            self.pwd = pwo
+            self.pwo = pwd
 
         self.save()
 
-    def get_player_ids(self):
-        bd = self.player_b_def.id
-        bo = self.player_b_off.id
-        wd = self.player_w_def.id
-        wo = self.player_w_off.id
+    def get_player_ids(self, side=None):
+        b = set((self.pbd.id, self.pbo.id))
+        w = set((self.pwd.id, self.pwo.id))
 
-        return tuple(set((bd, bo, wd, wo)))
+        if side == "b":
+            return tuple(b)
+        elif side == "w":
+            return tuple(w)
+        else:
+            return tuple(b | w)
+
+    def get_position_by_player(self, player):
+        if player in [self.pbd, self.pwd]:
+            return "d"
+        elif player in [self.pbo, self.pwo]:
+            return "o"
+
+    def get_side_by_player(self, player):
+        if player in [self.pbd, self.pbo]:
+            return "b"
+        elif player in [self.pwd, self.pwo]:
+            return "w"
+
+    def get_mode_by_player(self, player):
+        if player in [self.pbd, self.pbo]:
+            return "s" if self.single_b else "m"
+        elif player in [self.pwd, self.pwo]:
+            return "s" if self.single_w else "m"
 
 
 db.create_tables([Player, Game, Event])
