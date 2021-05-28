@@ -77,7 +77,7 @@ def play_synthetic_event(n_player, n_games):
 
         while not g.finished:
             side = random.choice(["b", "w"])
-            slot = random.choice(["def", "off", "off"])
+            slot = random.choice(["d", "o", "o"])
             how = random.choice(["g", "g", "g", "g", "o"])
             if how == "g":
                 g.goal(side, slot)

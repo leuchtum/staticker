@@ -184,28 +184,34 @@ class Game(BaseModel):
     def goal(self, side, slot):
         if self.finished:
             raise(Exception("Game is already finished."))
-        if side == "b" and slot == "def":
+        if side == "b" and slot == "d":
             msg = "gbd"
-        elif side == "b" and slot == "off":
+        elif side == "b" and slot == "o":
             msg = "gbo"
-        elif side == "w" and slot == "def":
+        elif side == "w" and slot == "d":
             msg = "gwd"
-        elif side == "w" and slot == "off":
+        elif side == "w" and slot == "o":
             msg = "gwo"
-        self.add_to_history(msg)
+        self._add_to_history(msg)
 
     def owner(self, side, slot):
         if self.finished:
             raise(Exception("Game is already finished."))
-        if side == "b" and slot == "def":
+        if side == "b" and slot == "d":
             msg = "obd"
-        elif side == "b" and slot == "off":
+        elif side == "b" and slot == "o":
             msg = "obo"
-        elif side == "w" and slot == "def":
+        elif side == "w" and slot == "d":
             msg = "owd"
-        elif side == "w" and slot == "off":
+        elif side == "w" and slot == "o":
             msg = "owo"
-        self.add_to_history(msg)
+        self._add_to_history(msg)
+
+    def goal_and_owner_by_key(self, key):
+        if self.finished:
+            raise(Exception("Game is already finished."))
+        assert key in ["gbd", "gbo", "gwd", "gwo", "obd", "obo", "owd", "owo"]
+        self._add_to_history(key)
 
     def decode(self):
         msgs = self.history.split("_")
@@ -225,16 +231,16 @@ class Game(BaseModel):
             counters[msg] += 1
         return counters
 
-    def add_to_history(self, msg):
+    def _add_to_history(self, msg):
         sep = "_" if self.history else ""
         self.history += sep + msg
-        self.update_fields_and_save()
+        self._update_fields_and_save()
 
     def undo(self):
         msgs = self.history.split("_")
         msgs = msgs[:-1]
         self.history = "_".join(msgs)
-        self.update_fields_and_save()
+        self._update_fields_and_save()
 
     def get_score(self):
         counters = self.decode()
@@ -245,7 +251,7 @@ class Game(BaseModel):
 
         return {"b": gb + ow, "w": gw + ob}
 
-    def update_fields_and_save(self):
+    def _update_fields_and_save(self):
         score = self.get_score()
         self.started = bool(self.history)
         self.finished = score["b"] >= self.playto or score["w"] >= self.playto
