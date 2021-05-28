@@ -87,16 +87,18 @@ void decode_serial_input(){
   // Fetch mode
   String mode = json_dict["mode"];
 
-  // Process mode setLED
-  if(mode == "setLED"){
+  // Process mode setled
+  if(mode == "setled"){
     const char* led_bd = json_dict["lbd"];
     const char* led_bo = json_dict["lbo"];
     const char* led_wd = json_dict["lwd"];
     const char* led_wo = json_dict["lwo"];
     bool all_exist = led_bd && led_bo && led_wd && led_wo;
-    raise_error_if_missing_key(all_exist);
     if (all_exist){
-      Serial.println("SET LED");
+      send("echo","setled");
+    }
+    else{
+      raise_error("MissingKey or InvalidValues");
     }
   }
 
@@ -109,13 +111,6 @@ void decode_serial_input(){
 
 void send(String mode, String msg){
   core_send(mode, msg);
-}
-
-
-void raise_error_if_missing_key(bool all_ok){
-  if (!all_ok){
-    raise_error("MissingKey");
-  }    
 }
 
 
