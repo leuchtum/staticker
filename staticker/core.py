@@ -95,7 +95,11 @@ class Event(BaseModel):
 
     def get_active_game(self):
         games = get_multiple_games_by_id(self.elements["g"])
-        return [g for g in games if g.finished == False]
+        active_games = [g for g in games if g.finished == False]
+        if len(active_games) == 1:
+            return active_games[0]
+        elif len(active_games) > 1:
+            raise(Exception("Found more than one active game."))
 
 
 #################################################################

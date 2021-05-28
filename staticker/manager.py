@@ -31,6 +31,17 @@ class Manager:
 
     def _process_serial_event(self, dic):
         print(dic)
+        mode = dic["mode"]
+        
+        if mode == "pressed":
+            active_game = self.get_active_game()
+            if active_game:
+                active_game.goal_and_owner_by_key(dic["msg"])
+            else:
+                pass
+        elif mode == "error":
+            msg = dic["msg"]
+            raise Exception(f"Error from Arduino: {msg}")
 
 
 manager = Manager()

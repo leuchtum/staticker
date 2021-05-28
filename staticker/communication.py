@@ -35,18 +35,18 @@ class ArduinoAsyncSerial:
                     dic = None
                 if dic:
                     self.callable(dic)
-        except Exception as e: #TODO
+        except Exception as e:  # TODO
             self.available = False
-            
+
     async def _write(self, dic):
         if type(dic) != dict:
             raise ValueError
-        
+
         raw = (str(json.dumps(dic)) + "\n").encode()
         try:
             self.writer.write(raw)
         except Exception as e:
-            raise e # TODO 
+            raise e  # TODO
 
     def set_callback(self, callable):
         self.callable = callable
@@ -55,7 +55,7 @@ class ArduinoAsyncSerial:
 arduino = ArduinoAsyncSerial()
 
 if __name__ == "__main__":
-    
+
     async def main():
         await arduino.start_listen()
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
             await asyncio.sleep(0.5)
             a = dict(mode="setLED")
             await arduino._write(a)
-        
+
     arduino.register_read_process(print)
     loop = asyncio.get_event_loop()
     loop.create_task(main())
