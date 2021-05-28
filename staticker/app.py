@@ -31,11 +31,11 @@ templates = Jinja2Templates(directory="staticker/templates")
 
 @app.on_event("startup")
 async def startup_event():
-    arduino.start_listen()
+    await arduino.start_listen()
 
 @app.get("/debug")
 async def debug():
-    await arduino._write("!101!")
+    await arduino._write(dict(mode="setLED"))
     return {}
 
 ##############################################################

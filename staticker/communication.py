@@ -1,20 +1,7 @@
-from asyncio import get_event_loop
+import asyncio
 from serial_asyncio import open_serial_connection
+import json
 
-'''
-Spezification protocoll:
-
-    Message composition:
-        !X_M!
-        
-    !: Start and and characters
-    X: Mode indentifier [0:9]
-    _: Delimiter
-    Start msg: !
-    Mode
-    End msg: !
-    
-'''
 
 class ArduinoAsyncSerial:
     def __init__(self):
@@ -23,49 +10,54 @@ class ArduinoAsyncSerial:
         self.reader = None
         self.writer = None
 
-    def start_listen(self):
-        loop = get_event_loop()
-        loop.create_task(self._listen())
+    async def start_listen(self):
+        await self._open_connection()
+        asyncio.create_task(self._listen())
 
-    async def _listen(self):
+    async def _open_connection(self):
         self.reader, self.writer = await open_serial_connection(
             url=self.url, baudrate=self.baudrate)
+
+    async def _listen(self):
         while True:
             rawline = await self.reader.readline()
             try:
                 line = str(rawline, 'utf-8')
-                dic = self.decode(line)
+                dic = json.loads(line)
             except:
                 dic = None
             if dic:
-                await self._exec_read_process(dic)
+                self._exec_read_process(dic)
 
-    async def _write(self, string):
+    async def _write(self, dic):
+        raw = (str(json.dumps(dic)) + "\n").encode()
         try:
-            b = string.encode() + b''
-            self.writer.write(b)
+            self.writer.write(raw)
         except Exception as e:
-            raise e
+            raise e # TODO 
 
     def register_read_process(self, callable):
         self.read_process = callable
 
-    def register_write_process(self, callable):
-        self.write_process = callable
-
-    async def _exec_read_process(self, dic):
+    def _exec_read_process(self, dic):
         self.read_process(dic)
 
-    def decode(self, string):
-        if string.count("!") != 2:
-            raise(Exception("Faulty message."))
 
-        raw_msg = string.split("!")[1]
-        msgs = raw_msg.split("_")
-        dic = {}
-        for msg in msgs:
-            key = msg.split("=")[0]
-            val = msg.split("=")[1]
-            val = bool(int(val))
-            dic[key] = val
-        return dic
+if __name__ == "__main__":
+    
+    async def main():
+        await ard.start_listen()
+
+    async def write():
+        while True:
+            print("write")
+            await asyncio.sleep(0.5)
+            a = dict(mode="setLED")
+            await ard._write(a)
+        
+    ard = ArduinoAsyncSerial()
+    ard.register_read_process(print)
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
+    loop.create_task(write())
+    loop.run_forever()
