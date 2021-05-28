@@ -8,41 +8,65 @@ bool serial_input_string_complete = false;
 
 
 // Button General
-const int min_pressed_time = 300;
-
+const int DEBOUNCETIME = 30;
+const int UNDOTIME = 1500;
 
 // Button GoalWhiteDefense
 const int GWD_PIN = 6;
-Bounce gwd_button = Bounce();
-
+Bounce2::Button gwd_button = Bounce2::Button();
+int gwd_press_started = 0;
+bool gwd_sended = true;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   // reserve 200 bytes for the serial_input_string:
   serial_input_string.reserve(200);
 
-  // Init bounce objects
+  // Init button objects
   gwd_button.attach (GWD_PIN,INPUT_PULLUP);
-  gwd_button.interval(25);
+  gwd_button.interval(DEBOUNCETIME);
+  gwd_button.setPressedState(LOW); 
 }
 
 
 void loop() {
   // Check for incoming commands
   check_serial_input();
-  
-  // Update bounce objects
-  gwd_button.update();
 
-  // Check if state of button changed and if so process change
-  check_button(gwd_button, "gwd");
+  // Check buttons
+  check_button(gwd_button, gwd_press_started, gwd_sended, "gwd");
 
 }
 
 
-void check_button(Bounce button, String button_indent){
-  if (button.fell()){
-    send("pressed", button_indent);
+void check_button(Bounce2::Button & button, int & press_started, bool & sended, String button_indent){
+  // Init variables
+  int pressed_time;
+
+  // Update button object
+  button.update();
+
+  // Detect rising edge and start timing
+  if (button.pressed()){
+    press_started = millis();
+    sended = false;
+  }
+
+  // Calculate the time the button has already been pressed
+  pressed_time = millis() - press_started;
+
+  // if button is released before UNDOTIME has passed, it's a normal press
+  if (button.released()){
+    if (pressed_time < UNDOTIME){
+      send("pressed", button_indent);
+    }
+    sended = true;
+  }
+
+  // if button is still pressed after UNDOTIME has passed, it's an UNDO press
+  if (button.isPressed() && sended == false && pressed_time > UNDOTIME){
+    send("pressed", "undo");
+    sended = true;
   }
 }
 

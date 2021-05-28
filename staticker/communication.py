@@ -6,7 +6,7 @@ import json
 class ArduinoAsyncSerial:
     def __init__(self):
         self.url = '/dev/ttyACM0'
-        self.baudrate = 9600
+        self.baudrate = 115200
         self.reader = None
         self.writer = None
 
