@@ -6,16 +6,6 @@ import starlette.status as status
 from . import core
 from .collections import PlayerCollection, EventCollection
 from .manager import manager
-from.communication import ArduinoAsyncSerial
-
-##############################################################
-
-
-arduino = ArduinoAsyncSerial()
-arduino.register_read_process(print)
-# arduino.register_write_process(print)
-
-##############################################################
 
 
 async def not_found(_, exc):
@@ -31,12 +21,12 @@ templates = Jinja2Templates(directory="staticker/templates")
 
 @app.on_event("startup")
 async def startup_event():
-    await arduino.start_listen()
+    await manager.startup()
 
 @app.get("/debug")
 async def debug():
-    await arduino._write(dict(mode="setLED"))
-    return {}
+    #await arduino._write(dict(mode="setLED"))
+    return {"is_arduino_available":manager.is_arduino_available()}
 
 ##############################################################
 
