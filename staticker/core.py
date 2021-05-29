@@ -82,11 +82,11 @@ class Event(BaseModel):
             self.save()
 
     def deactivate(self):
-        games = self.get_active_game()
-        if games:
+        game = self.get_active_game()
+        if game:
             msg = (
                 "Event can not be deactivated, because "
-                f"there is an active game with ID {games[0]}"
+                f"there is an active game with ID {game}"
             )
             raise(Exception(msg))
         else:
