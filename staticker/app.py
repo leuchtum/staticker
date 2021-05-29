@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 import starlette.status as status
 from . import core
 from .collections import PlayerCollection, EventCollection
-from .manager import manager
+from .communication import arduino
 
 
 async def not_found(_, exc):
@@ -21,12 +21,40 @@ templates = Jinja2Templates(directory="staticker/templates")
 
 @app.on_event("startup")
 async def startup_event():
-    await manager.startup()
+    arduino.set_button_callback(active_game_action)
+    await arduino.startup()
+
 
 @app.get("/debug")
 async def debug():
-    #await arduino._write(dict(mode="setLED"))
-    return {"is_arduino_available":manager.is_arduino_available()}
+    pass
+
+
+@app.get("/active-game")
+async def app_active_game():
+    # await arduino._write(dict(mode="setLED"))
+    return {"msg": "hello from debug2"}
+
+
+@app.post("/active-game/{action}")
+async def active_game_action(action: str):
+    try:
+        assert action in ["gbd", "gbo", "gwd", "gwo",
+                          "obd", "obo", "owd", "owo",
+                          "undo"
+                          ]
+    except AssertionError:
+        raise HTTPException(status_code=400, detail="Invalid command")
+
+    if action == "undo":
+        pass
+    else:
+        # active_game.goal_and_owner_by_key(action)
+        position = action[1:]
+        #player_history = active_game.get_player_history(position)
+        player_history = ["o", "g", "g"]
+        await arduino.set_leds(position, player_history)
+
 
 ##############################################################
 

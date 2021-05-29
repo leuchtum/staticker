@@ -2,6 +2,10 @@ import asyncio
 from serial_asyncio import open_serial_connection
 import json
 
+RED = [255,0,0]
+GREEN = [0,255,0]
+BLUE = [0,0,255]
+ARRAYLEN = 10
 
 class ArduinoAsyncSerial:
     def __init__(self):
@@ -11,7 +15,7 @@ class ArduinoAsyncSerial:
         self.writer = None
         self.available = False
 
-    async def start_listen(self):
+    async def startup(self):
         try:
             await self._open_connection()
         except:
@@ -34,30 +38,58 @@ class ArduinoAsyncSerial:
                 except:
                     dic = None
                 if dic:
-                    self.callable(dic)
+                    asyncio.create_task(self._decode(dic))
         except Exception as e:  # TODO
             self.available = False
 
-    async def _write(self, dic):
-        if type(dic) != dict:
-            raise ValueError
-
-        raw = (str(json.dumps(dic)) + "\n").encode()
+    async def _write(self, mode, msg):
+        package = {
+            "mode": mode,
+            "msg": msg
+        }
+        raw = (str(json.dumps(package)) + "\n").encode()
+        
         try:
             self.writer.write(raw)
         except Exception as e:
             raise e  # TODO
 
-    def set_callback(self, callable):
-        self.callable = callable
+    def set_button_callback(self, callable):
+        self._button_callback = callable
 
-
+    async def _decode(self, dic):
+        mode = dic["mode"]
+        msg = dic["msg"]
+        
+        if mode == "pressed":
+                await self._button_callback(msg)
+        elif mode == "echo":
+            print(msg)
+        elif mode == "error":
+            raise Exception(f"Error from Arduino: {msg}")
+        
+    async def set_leds(self, position, player_history):
+        leds = [[0,0,0] for _ in range(ARRAYLEN)]
+        for i in range(len(player_history)):
+            if player_history[i] == "g":
+                leds[i] = GREEN
+            elif player_history[i] == "o":
+                leds[i] = RED
+            else:
+                raise ValueError
+        msg = {
+            "position":position,
+            "leds": leds
+        }
+        await self._write("setled", msg)
+        
+        
 arduino = ArduinoAsyncSerial()
 
 if __name__ == "__main__":
 
     async def main():
-        await arduino.start_listen()
+        await arduino.startup()
 
     async def write():
         while True:

@@ -90,20 +90,19 @@ void decode_serial_input(){
   String mode = json_dict["mode"];
 
   // Process mode setled
-  // {"mode":"setled","slot":"wd","BRT":100,"R":[1,2,3,4,5,6,7,8,9,10],"G":[1,2,3,4,5,6,7,8,9,10],"B":[1,2,3,4,5,6,7,8,9,10]}
+  // {"mode":"setled","msg":{"pos":"wd","R":[1,2,3,4,5,6,7,8,9,10],"G":[1,2,3,4,5,6,7,8,9,10],"B":[1,2,3,4,5,6,7,8,9,10]}}
   if(mode == "setled"){
     // Bool if error in nested json
     bool nested_exists = true;
     
     // Fetch non-nested json
-    const char* slot = json_dict["slot"];
-    int brightness = json_dict["BRT"];
+    const char* pos = json_dict["slot"];
 
     // Fetch nested json
     int red[ARRAYLEN];
     for (int i=0; i<ARRAYLEN; i++){
-      red[i] = json_dict["R"][i];
-      if (!json_dict["R"][i]){
+      red[i] = json_dict["msg"]["R"][i];
+      if (!red[i] && red[i] != 0){
         nested_exists = false;
       }
     }
@@ -111,8 +110,8 @@ void decode_serial_input(){
     // Fetch nested json
     int green[ARRAYLEN];
     for (int i=0; i<ARRAYLEN; i++){
-      green[i] = json_dict["G"][i];
-      if (!json_dict["G"][i]){
+      green[i] = json_dict["msg"]["G"][i];
+      if (!green[i] && green[i] != 0){
         nested_exists = false;
       }
     }
@@ -120,16 +119,16 @@ void decode_serial_input(){
     // Fetch nested json
     int blue[ARRAYLEN];
     for (int i=0; i<ARRAYLEN; i++){
-      blue[i] = json_dict["B"][i];
-      if (!json_dict["B"][i] && json_dict["B"][i] != 0){
+      blue[i] = json_dict["msg"]["B"][i];
+      if (!blue[i] && blue[i] != 0){
         nested_exists = false;
       }
     }
 
     // Check if non-nested and nested are valid
-    if (slot && brightness && nested_exists){
+    if (nested_exists){
       send("echo","setled");
-      // Process slot, brightness, red, green, blue
+      // Process pos, red, green, blue
     }
     else{
       raise_error("MissingKey or InvalidValues");
