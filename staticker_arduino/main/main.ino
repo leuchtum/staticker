@@ -6,6 +6,8 @@
 String serial_input_string = "";
 bool serial_input_string_complete = false;
 
+// LED General
+const int ARRAYLEN = 10;
 
 // Button General
 const int DEBOUNCETIME = 30;
@@ -63,7 +65,7 @@ void check_button(Bounce2::Button & button, int & press_started, bool & sended, 
     sended = true;
   }
 
-  // if button is still pressed after UNDOTIME has passed, it's an UNDO press
+  // If button is still pressed after UNDOTIME has passed, it's an UNDO press
   if (button.isPressed() && sended == false && pressed_time > UNDOTIME){
     send("pressed", "undo");
     sended = true;
@@ -73,12 +75,12 @@ void check_button(Bounce2::Button & button, int & press_started, bool & sended, 
 
 void decode_serial_input(){
   // Init JSON document
-  StaticJsonDocument<128> json_dict;
+  StaticJsonDocument<512> json_dict;
 
   // Deserialize the JSON document
   DeserializationError err = deserializeJson(json_dict, serial_input_string);
 
-  // Test if parsing succeeds.
+  // Test if parsing succeeds
   if (err) {
     raise_error(err.f_str());
     return;
@@ -88,23 +90,53 @@ void decode_serial_input(){
   String mode = json_dict["mode"];
 
   // Process mode setled
+  // {"mode":"setled","slot":"wd","BRT":100,"R":[1,2,3,4,5,6,7,8,9,10],"G":[1,2,3,4,5,6,7,8,9,10],"B":[1,2,3,4,5,6,7,8,9,10]}
   if(mode == "setled"){
-    const char* led_bd = json_dict["lbd"];
-    const char* led_bo = json_dict["lbo"];
-    const char* led_wd = json_dict["lwd"];
-    const char* led_wo = json_dict["lwo"];
-    bool all_exist = led_bd && led_bo && led_wd && led_wo;
-    if (all_exist){
+    // Bool if error in nested json
+    bool nested_exists = true;
+    
+    // Fetch non-nested json
+    const char* slot = json_dict["slot"];
+    int brightness = json_dict["BRT"];
+
+    // Fetch nested json
+    int red[ARRAYLEN];
+    for (int i=0; i<ARRAYLEN; i++){
+      red[i] = json_dict["R"][i];
+      if (!json_dict["R"][i]){
+        nested_exists = false;
+      }
+    }
+
+    // Fetch nested json
+    int green[ARRAYLEN];
+    for (int i=0; i<ARRAYLEN; i++){
+      green[i] = json_dict["G"][i];
+      if (!json_dict["G"][i]){
+        nested_exists = false;
+      }
+    }
+
+    // Fetch nested json
+    int blue[ARRAYLEN];
+    for (int i=0; i<ARRAYLEN; i++){
+      blue[i] = json_dict["B"][i];
+      if (!json_dict["B"][i] && json_dict["B"][i] != 0){
+        nested_exists = false;
+      }
+    }
+
+    // Check if non-nested and nested are valid
+    if (slot && brightness && nested_exists){
       send("echo","setled");
+      // Process slot, brightness, red, green, blue
     }
     else{
       raise_error("MissingKey or InvalidValues");
     }
   }
-
-  // No mode found, so raise error
   else{
-    raise_error("InvalidInput");
+    raise_error("MissingMode or InvalidInput");
   }
 }
 
@@ -123,6 +155,8 @@ void core_send(String mode, String msg){
   StaticJsonDocument<64> json;
   json["mode"] = mode;
   json["msg"] = msg;
+
+  // Write to serial with additional linebreak
   serializeJson(json, Serial);
   Serial.print("\n");
 }
@@ -130,8 +164,7 @@ void core_send(String mode, String msg){
 
 void check_serial_input(){
   if (serial_input_string_complete) {
-    
-    // Execute command in serial input
+    // Execute encoded command
     decode_serial_input();
     
     // clear the string:
@@ -142,6 +175,9 @@ void check_serial_input(){
 
 
 void serialEvent() {
+  // This function is called automatically after each loop
+  // Copied from Examples --> Communication --> SerialEvent
+  
   while (Serial.available()) {
     
     // get the new byte:
