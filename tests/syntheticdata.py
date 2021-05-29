@@ -92,6 +92,10 @@ if __name__ == '__main__':
     n_new_players = 5
     n_games = 20
 
+    evs = [ev for ev in Event.select()]
+    for ev in evs:
+        ev.deactivate()
+        
     new_players(n_new_players)
 
     play_synthetic_event(4, n_games)
