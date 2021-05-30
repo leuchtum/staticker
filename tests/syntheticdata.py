@@ -1,4 +1,4 @@
-from staticker.core import Player, Event, Game
+from staticker.core import Player, Event, Game, new_player, new_game
 import random
 from peewee import fn
 
@@ -46,8 +46,7 @@ def get_random_game():
 
 def new_players(n):
     for _ in range(n):
-        p = Player(name=get_random_name())
-        p.save()
+        new_player(name=get_random_name())
 
 
 def play_synthetic_event(n_player, n_games):
@@ -71,7 +70,7 @@ def play_synthetic_event(n_player, n_games):
             p_w = random.sample(player, n_w)
             equals = any(p in p_w for p in p_b)
 
-        g = Game()
+        g = new_game(ev)
         g.add_player(p_b, p_w)
         ev.add_game(g)
 
@@ -84,7 +83,6 @@ def play_synthetic_event(n_player, n_games):
             elif how == "o":
                 g.owner(side, slot)
         
-        print(f"Ev: {ev.id} | Game: {g.id}")
     ev.deactivate()
 
 

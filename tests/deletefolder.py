@@ -1,8 +1,9 @@
 from staticker.folder import DBDirectory
 
-def delete_folder():
+def delete():
     dir = DBDirectory()
+    dir.del_db()
     dir.del_folder()    
     
 if __name__ == '__main__':
-    delete_folder()
+    delete()

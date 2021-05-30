@@ -2,6 +2,7 @@ from peewee import SqliteDatabase, Model, CharField, DateTimeField, IntegerField
 from playhouse.sqlite_ext import JSONField
 from datetime import datetime
 from .folder import DBDirectory
+from .log import logger
 
 
 dir = DBDirectory()
@@ -18,7 +19,7 @@ class BaseModel(Model):
 #################################################################
 
 
-class Event(BaseModel):
+class Event(BaseModel): # TODO Rewrite JsonField? Games now have parent Event ID
     created = DateTimeField(default=datetime.now)
     mode = CharField()
     elements = JSONField(default={"p": [], "g": []})
@@ -31,6 +32,7 @@ class Event(BaseModel):
                     self.elements["p"].append(p.id)
 
             self.save()
+            logger.debug(f"Player {player} were added to Event[{self}].")
 
     def add_game(self, game):
         if not game.id:
@@ -58,7 +60,8 @@ class Event(BaseModel):
 
                 self.elements["g"].append(game.id)
 
-            self.save()
+        self.save()
+        logger.debug(f"Game[{game.id}] was added to Event[{self}].")
 
     def _is_active(self):
         if self.active:
@@ -80,6 +83,7 @@ class Event(BaseModel):
                 raise(Exception(msg))
             self.active = True
             self.save()
+            logger.debug(f"Event[{self}] activated.")
 
     def deactivate(self):
         game = self.get_active_game()
@@ -90,8 +94,10 @@ class Event(BaseModel):
             )
             raise(Exception(msg))
         else:
-            self.active = False
-            self.save()
+            if self.active:
+                self.active = False
+                self.save()
+                logger.debug(f"Event[{self}] deactivated.")
 
     def get_active_game(self):
         games = get_multiple_games_by_id(self.elements["g"])
@@ -136,11 +142,12 @@ class Player(BaseModel):
 #################################################################
 
 
-class Game(BaseModel):
+class Game(BaseModel): # TODO process event
     # General information
     created = DateTimeField(default=datetime.now)
     started = BooleanField(default=False)
     finished = BooleanField(default=False)
+    event = ForeignKeyField(Event)
     # Player information
     single_b = BooleanField()
     single_w = BooleanField()
@@ -184,6 +191,9 @@ class Game(BaseModel):
             raise(Exception(msg))
 
         self.save()
+        player = [self.pbd, self.pbo, self.pwd, self.pwo]
+        logger.debug(f"Added Player {player} to Game[{self}].")
+        logger.debug(f"Game[{self}] saved.")
 
     def goal(self, side, slot):
         if self.finished:
@@ -217,7 +227,7 @@ class Game(BaseModel):
         assert key in ["gbd", "gbo", "gwd", "gwo", "obd", "obo", "owd", "owo"]
         self._add_to_history(key)
 
-    def decode(self):
+    def _decode(self):
         msgs = self.history.split("_")
         counters = {
             "gbd": 0,
@@ -238,16 +248,24 @@ class Game(BaseModel):
     def _add_to_history(self, msg):
         sep = "_" if self.history else ""
         self.history += sep + msg
-        self._update_fields_and_save()
+        self._update_pre()
+        logger.debug(f"Added '{msg}' to history for Game[{self}].")
+        self._update_post_and_save()
+        
 
     def undo(self):
         msgs = self.history.split("_")
         msgs = msgs[:-1]
         self.history = "_".join(msgs)
-        self._update_fields_and_save()
+        self._update_pre()
+        if self.finished:
+            logger.debug(f"Reopen Game[{self}]")
+        logger.debug(f"Undid last action for Game[{self}].")
+        self._update_post_and_save()
+        
 
     def get_score(self):
-        counters = self.decode()
+        counters = self._decode()
         gb = counters["gbd"] + counters["gbo"]
         gw = counters["gwd"] + counters["gwo"]
         ob = counters["obd"] + counters["obo"]
@@ -255,10 +273,19 @@ class Game(BaseModel):
 
         return {"b": gb + ow, "w": gw + ob}
 
-    def _update_fields_and_save(self):
-        score = self.get_score()
+    def _update_pre(self):
+        if self.history and not self.started:
+            logger.debug(f"Started Game[{self}].")
         self.started = bool(self.history)
-        self.finished = score["b"] >= self.playto or score["w"] >= self.playto
+            
+    def _update_post_and_save(self):
+        score = self.get_score()
+        finished = score["b"] >= self.playto or score["w"] >= self.playto
+    
+        if not self.finished and finished:
+            logger.debug(f"Finished Game[{self}].")
+            
+        self.finished = finished
         self.save()
 
     def switch_sides(self):
@@ -280,6 +307,7 @@ class Game(BaseModel):
         self.single_w = sb
 
         self.save()
+        logger.debug(f"Switched sides of Game[{self}].")
 
     def switch_slots(self, side):
         if self.started:
@@ -293,11 +321,14 @@ class Game(BaseModel):
         if side == "b":
             self.pbd = pbo
             self.pbo = pbd
+            log_str = "black"
         elif side == "w":
             self.pwd = pwo
             self.pwo = pwd
+            log_str = "white"
 
         self.save()
+        logger.debug(f"Switched {log_str} side of Game[{self}].")
 
     def get_player_ids(self, side=None):
         b = set((self.pbd.id, self.pbo.id))
@@ -336,6 +367,25 @@ db.create_tables([Player, Game, Event])
 #################################################################
 
 
+def new_player(name):
+    try:
+        p = Player(name=name)
+        p.save()
+        logger.debug(f"Player[{p.id}] '{name}' created and saved.")
+    except:
+        raise Exception(f"Player[{p.id}] '{name}' already exists.")
+    return p
+
+
+def new_game(event):
+    g = Game(event=event)
+    logger.debug(f"Empty game created.")
+    return g
+
+
+###############################
+
+
 def get_game_by_id(game_id):
     try:
         return Game[game_id]
@@ -348,6 +398,7 @@ def get_multiple_games_by_id(game_ids):
         return [g for g in Game.select().where(Game.id << game_ids)]
     except:
         raise(Exception(f"No games with given ID's found."))
+
 
 ###############################
 
@@ -381,6 +432,7 @@ def get_multiple_player_by_name(player_names):
 
 
 ###############################
+
 
 def get_event_by_id(event_id):
     try:

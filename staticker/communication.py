@@ -1,11 +1,13 @@
 import asyncio
 from serial_asyncio import open_serial_connection
 import json
+from .log import logger
 
-RED = [255,0,0]
-GREEN = [0,255,0]
-BLUE = [0,0,255]
+RED = [255, 0, 0]
+GREEN = [0, 255, 0]
+BLUE = [0, 0, 255]
 ARRAYLEN = 10
+
 
 class ArduinoAsyncSerial:
     def __init__(self):
@@ -23,6 +25,7 @@ class ArduinoAsyncSerial:
         else:
             asyncio.create_task(self._listen())
             self.available = True
+            logger.debug("Serial connection opened.")
 
     async def _open_connection(self):
         self.reader, self.writer = await open_serial_connection(
@@ -36,9 +39,11 @@ class ArduinoAsyncSerial:
                     line = str(rawline, 'utf-8')
                     dic = json.loads(line)
                 except:
-                    dic = None
-                if dic:
+                    logger.warning("Received unreadable JSON.")
+                else:
                     asyncio.create_task(self._decode(dic))
+                    logger.debug(f"Received package {dic}.")
+                    
         except Exception as e:  # TODO
             self.available = False
 
@@ -48,11 +53,13 @@ class ArduinoAsyncSerial:
             "msg": msg
         }
         raw = (str(json.dumps(package)) + "\n").encode()
-        
+
         try:
             self.writer.write(raw)
         except Exception as e:
             raise e  # TODO
+        else:
+            logger.debug(f"Sent package {package}.")
 
     def set_button_callback(self, callable):
         self._button_callback = callable
@@ -60,16 +67,17 @@ class ArduinoAsyncSerial:
     async def _decode(self, dic):
         mode = dic["mode"]
         msg = dic["msg"]
-        
+
         if mode == "pressed":
-                await self._button_callback(msg)
+            logger.debug(f"Decoded as button press at position {msg}.")
+            await self._button_callback(msg)
         elif mode == "echo":
-            print(msg)
+            logger.debug(f"Decoded as echo with message {msg}.")
         elif mode == "error":
             raise Exception(f"Error from Arduino: {msg}")
-        
+
     async def set_leds(self, position, player_history):
-        leds = [[0,0,0] for _ in range(ARRAYLEN)]
+        leds = [[0, 0, 0] for _ in range(ARRAYLEN)]
         for i in range(len(player_history)):
             if player_history[i] == "g":
                 leds[i] = GREEN
@@ -78,12 +86,12 @@ class ArduinoAsyncSerial:
             else:
                 raise ValueError
         msg = {
-            "position":position,
+            "position": position,
             "leds": leds
         }
         await self._write("setled", msg)
-        
-        
+
+
 arduino = ArduinoAsyncSerial()
 
 if __name__ == "__main__":

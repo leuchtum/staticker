@@ -6,6 +6,7 @@ import starlette.status as status
 from . import core
 from .collections import PlayerCollection, EventCollection
 from .communication import arduino
+from .log import logger
 
 
 async def not_found(_, exc):
@@ -27,7 +28,7 @@ async def startup_event():
 
 @app.get("/debug")
 async def debug():
-    pass
+    logger.debug("hello from /debug")
 
 
 @app.get("/active-game")

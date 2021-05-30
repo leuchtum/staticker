@@ -1,5 +1,7 @@
+from .log import logger # Must be imported before .app!
 from .app import app
 import uvicorn
 
 if __name__ == "__main__":
-    uvicorn.run(app, host='localhost', port=8000, loop='asyncio')
+    logger.info("Starting staticker")
+    uvicorn.run(app, host='localhost')
