@@ -1,5 +1,6 @@
 #include <ArduinoJson.h>
 #include <Bounce2.h>
+#include <Adafruit_NeoPixel.h>
 
 
 // Serial input
@@ -7,27 +8,44 @@ String serial_input_string = "";
 bool serial_input_string_complete = false;
 
 // LED General
-const int ARRAYLEN = 10;
+const int ARRAYLEN = 8;
+const int WD_LED_PIN = 7;
+Adafruit_NeoPixel wd_led(ARRAYLEN, WD_LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // Button General
 const int DEBOUNCETIME = 30;
 const int UNDOTIME = 1500;
 
 // Button GoalWhiteDefense
-const int GWD_PIN = 6;
+const int GWD_BUTTON_PIN = 6;
 Bounce2::Button gwd_button = Bounce2::Button();
 int gwd_press_started = 0;
 bool gwd_sended = true;
+
+// Button OwnerWhiteDefense
+const int OWD_BUTTON_PIN = 5;
+Bounce2::Button owd_button = Bounce2::Button();
+int owd_press_started = 0;
+bool owd_sended = true;
 
 void setup() {
   Serial.begin(115200);
   // reserve 200 bytes for the serial_input_string:
   serial_input_string.reserve(200);
 
+  // Init LEDs
+  wd_led.begin();
+  wd_led.clear();
+  wd_led.show();
+
   // Init button objects
-  gwd_button.attach (GWD_PIN,INPUT_PULLUP);
+  gwd_button.attach (GWD_BUTTON_PIN,INPUT_PULLUP);
   gwd_button.interval(DEBOUNCETIME);
-  gwd_button.setPressedState(LOW); 
+  gwd_button.setPressedState(LOW);
+
+  owd_button.attach (OWD_BUTTON_PIN,INPUT_PULLUP);
+  owd_button.interval(DEBOUNCETIME);
+  owd_button.setPressedState(LOW); 
 }
 
 
@@ -37,7 +55,7 @@ void loop() {
 
   // Check buttons
   check_button(gwd_button, gwd_press_started, gwd_sended, "gwd");
-
+  check_button(owd_button, owd_press_started, owd_sended, "owd");
 }
 
 
@@ -67,7 +85,7 @@ void check_button(Bounce2::Button & button, int & press_started, bool & sended, 
 
   // If button is still pressed after UNDOTIME has passed, it's an UNDO press
   if (button.isPressed() && sended == false && pressed_time > UNDOTIME){
-    send("pressed", "undo");
+    send("pressed", "undo_" + button_indent);
     sended = true;
   }
 }
@@ -96,7 +114,7 @@ void decode_serial_input(){
     bool nested_exists = true;
     
     // Fetch non-nested json
-    const char* pos = json_dict["slot"];
+    String pos = json_dict["msg"]["pos"];
 
     // Fetch nested json
     int red[ARRAYLEN];
@@ -127,16 +145,43 @@ void decode_serial_input(){
 
     // Check if non-nested and nested are valid
     if (nested_exists){
+      if (pos == "wd"){
+        set_led(wd_led, red, green, blue);
+      }
       send("echo","setled");
-      // Process pos, red, green, blue
     }
     else{
       raise_error("MissingKey or InvalidValues");
     }
   }
+  else if(mode == "clear"){
+    String msg = json_dict["msg"];
+    if (msg == "wd"){
+      wd_led.clear();
+      wd_led.show();
+      send("echo","clear wd");
+    }
+    else if (msg == "all"){
+      wd_led.clear();
+      wd_led.show();
+      send("echo","clear all");
+    }
+    else{
+      raise_error("MissingKey or InvalidValues");
+    }
+    
+  }
   else{
     raise_error("MissingMode or InvalidInput");
   }
+}
+
+
+void set_led(Adafruit_NeoPixel & led, int red[ARRAYLEN], int green[ARRAYLEN], int blue[ARRAYLEN]){
+  for (int i=0; i<ARRAYLEN; i++){
+    led.setPixelColor(i, led.Color(red[i], green[i], blue[i]));
+  }
+  led.show();
 }
 
 
