@@ -8,7 +8,7 @@ from .log import logger
 from .dependencies import manager, templates
 
 from .routes.event import router as event_router
-from .routes.game import router as game_router
+from .routes.game import router as game_router, active_game_action
 from .routes.player import router as player_router
 
 
@@ -21,9 +21,8 @@ app.include_router(player_router)
 
 @app.on_event("startup")
 async def startup_event():
-    #arduino.set_button_callback(app_active_game_action)
-    #await arduino.startup()
-    pass
+    arduino.set_button_callback(active_game_action)
+    await arduino.startup()
 
 
 @app.get("/debug")
