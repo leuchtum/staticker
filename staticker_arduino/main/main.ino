@@ -8,7 +8,7 @@ String serial_input_string = "";
 bool serial_input_string_complete = false;
 
 // LED General
-const int ARRAYLEN = 8;
+const int ARRAYLEN = 10;
 const int WD_LED_PIN = 7;
 Adafruit_NeoPixel wd_led(ARRAYLEN, WD_LED_PIN, NEO_GRB + NEO_KHZ800);
 

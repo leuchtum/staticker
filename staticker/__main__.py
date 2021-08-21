@@ -4,4 +4,4 @@ import uvicorn
 
 if __name__ == "__main__":
     logger.info("Starting staticker")
-    uvicorn.run(app, host='localhost')
+    uvicorn.run(app, host='0.0.0.0')

@@ -9,6 +9,22 @@ dir = DBDirectory()
 dir.mk_dir()
 db = SqliteDatabase(str(dir.get_db_path()))
 
+#################################################################
+#################################################################
+
+class NotAllowedError(Exception):
+    pass
+
+class FatalError(Exception):
+    pass
+
+class NotFoundError(Exception):
+    pass
+
+
+#################################################################
+#################################################################
+
 
 class BaseModel(Model):
     class Meta:
@@ -39,7 +55,7 @@ class Event(BaseModel): # TODO Rewrite JsonField? Games now have parent Event ID
             msg = (
                 "Game has no ID and cannot be added to event."
             )
-            raise Exception(msg)
+            raise NotAllowedError(msg)
 
         if self._is_active():
             if self.mode == "free":
@@ -51,23 +67,25 @@ class Event(BaseModel): # TODO Rewrite JsonField? Games now have parent Event ID
                             f"although game with id {g.id} "
                             "has not yet been finished."
                         )
-                        raise(Exception(msg))
+                        raise(NotAllowedError(msg))
 
                 for pid in game.get_player_ids():
                     if pid not in self.elements["p"]:
                         msg = f"Player with id {pid} not in this event."
-                        raise(Exception(msg))
+                        raise(NotAllowedError(msg))
 
                 self.elements["g"].append(game.id)
-
-        self.save()
-        logger.debug(f"Game[{game.id}] was added to Event[{self}].")
+            else:
+                raise(NotImplementedError)
+            
+            self.save()
+            logger.debug(f"Game[{game.id}] was added to Event[{self}].")
 
     def _is_active(self):
         if self.active:
             return True
         else:
-            raise(Exception("Event is not active."))
+            raise(NotAllowedError("Event is not active."))
 
     def activate(self):
         if not self.active:
@@ -80,7 +98,7 @@ class Event(BaseModel): # TODO Rewrite JsonField? Games now have parent Event ID
                     "because there exists an active event "
                     f"with ID {active_ev_ids[0]}."
                 )
-                raise(Exception(msg))
+                raise(NotAllowedError(msg))
             self.active = True
             self.save()
             logger.debug(f"Event[{self}] activated.")
@@ -92,7 +110,7 @@ class Event(BaseModel): # TODO Rewrite JsonField? Games now have parent Event ID
                 "Event can not be deactivated, because "
                 f"there is an active game with ID {game}"
             )
-            raise(Exception(msg))
+            raise(NotAllowedError(msg))
         else:
             if self.active:
                 self.active = False
@@ -105,7 +123,7 @@ class Event(BaseModel): # TODO Rewrite JsonField? Games now have parent Event ID
         if len(active_games) == 1:
             return active_games[0]
         elif len(active_games) > 1:
-            raise(Exception("Found more than one active game."))
+            raise(FatalError("Found more than one active game."))
 
 
 #################################################################
@@ -175,7 +193,7 @@ class Game(BaseModel): # TODO process event
             self.single_b = False
         else:
             msg = "Length of black must equals 1 or 2"
-            raise(Exception(msg))
+            raise(ValueError(msg))
 
         # Add white players
         if len(white) == 1:
@@ -188,7 +206,7 @@ class Game(BaseModel): # TODO process event
             self.single_w = False
         else:
             msg = "Length of white must equals 1 or 2"
-            raise(Exception(msg))
+            raise(ValueError(msg))
 
         self.save()
         player = [self.pbd, self.pbo, self.pwd, self.pwo]
@@ -197,7 +215,7 @@ class Game(BaseModel): # TODO process event
 
     def goal(self, side, slot):
         if self.finished:
-            raise(Exception("Game is already finished."))
+            raise(NotAllowedError("Game is already finished."))
         if side == "b" and slot == "d":
             msg = "gbd"
         elif side == "b" and slot == "o":
@@ -210,7 +228,7 @@ class Game(BaseModel): # TODO process event
 
     def owner(self, side, slot):
         if self.finished:
-            raise(Exception("Game is already finished."))
+            raise(NotAllowedError("Game is already finished."))
         if side == "b" and slot == "d":
             msg = "obd"
         elif side == "b" and slot == "o":
@@ -223,7 +241,7 @@ class Game(BaseModel): # TODO process event
 
     def goal_and_owner_by_key(self, key):
         if self.finished:
-            raise(Exception("Game is already finished."))
+            raise(NotAllowedError("Game is already finished."))
         assert key in ["gbd", "gbo", "gwd", "gwo", "obd", "obo", "owd", "owo"]
         self._add_to_history(key)
 
@@ -290,7 +308,7 @@ class Game(BaseModel): # TODO process event
 
     def switch_sides(self):
         if self.started:
-            raise(Exception("Unable to switch sides, game has already started."))
+            raise(NotAllowedError("Unable to switch sides, game has already started."))
 
         pbd = self.pbd
         pbo = self.pbo
@@ -311,7 +329,7 @@ class Game(BaseModel): # TODO process event
 
     def switch_slots(self, side):
         if self.started:
-            raise(Exception("Unable to switch slots, game has already started."))
+            raise(NotAllowedError("Unable to switch slots, game has already started."))
 
         pbd = self.pbd
         pbo = self.pbo
@@ -373,7 +391,7 @@ def new_player(name):
         p.save()
         logger.debug(f"Player[{p.id}] '{name}' created and saved.")
     except:
-        raise Exception(f"Player[{p.id}] '{name}' already exists.")
+        raise NotAllowedError(f"Player[{p.id}] '{name}' already exists.")
     return p
 
 
@@ -390,14 +408,14 @@ def get_game_by_id(game_id):
     try:
         return Game[game_id]
     except:
-        raise(Exception(f"No game with id {game_id} found."))
+        raise(NotFoundError(f"No game with id {game_id} found."))
 
 
 def get_multiple_games_by_id(game_ids):
     try:
         return [g for g in Game.select().where(Game.id << game_ids)]
     except:
-        raise(Exception(f"No games with given ID's found."))
+        raise(NotFoundError(f"No games with given ID's found."))
 
 
 ###############################
@@ -407,28 +425,28 @@ def get_player_by_id(player_id):
     try:
         return Player[player_id]
     except:
-        raise(Exception(f"No player with id {player_id} found."))
+        raise(NotFoundError(f"No player with id {player_id} found."))
 
 
 def get_multiple_player_by_id(player_ids):
     try:
         return [p for p in Player.select().where(Player.id << player_ids)]
     except:
-        raise(Exception(f"No player with given ID's found."))
+        raise(NotFoundError(f"No player with given ID's found."))
 
 
 def get_player_by_name(player_name):
     try:
         return Player.select().where(Player.name == player_name).get()
     except:
-        raise(Exception(f"No player with name {player_name} found."))
+        raise(NotFoundError(f"No player with name {player_name} found."))
 
 
 def get_multiple_player_by_name(player_names):
     try:
         return [p for p in Player.select().where(Player.name << player_names)]
     except:
-        raise(Exception(f"No players with given names found."))
+        raise(NotFoundError(f"No players with given names found."))
 
 
 ###############################
@@ -438,11 +456,11 @@ def get_event_by_id(event_id):
     try:
         return Event[event_id]
     except:
-        raise(Exception(f"No event with id {event_id} found."))
+        raise(NotFoundError(f"No event with id {event_id} found."))
 
 
 def get_multiple_events_by_id(event_ids):
     try:
         return [ev for ev in Event.select().where(Event.id << event_ids)]
     except:
-        raise(Exception(f"No events with given ID's found."))
+        raise(NotFoundError(f"No events with given ID's found."))

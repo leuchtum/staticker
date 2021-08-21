@@ -17,8 +17,10 @@ class PlayerCollection:
 
     def get_player(self):
         return self.player
-
-
+    
+    def get_names_with_ids(self):
+        return {p.name : p.id for p in self.player}
+    
 class EventCollection:
     def __init__(self):
         self.events = []
