@@ -1,4 +1,5 @@
 from .core import Event
+from fastapi.templating import Jinja2Templates 
 
 
 class Manager:
@@ -26,3 +27,4 @@ class Manager:
 
 
 manager = Manager()
+templates = Jinja2Templates(directory="staticker/templates")

@@ -6,19 +6,20 @@
 {% if active_event %}
 <div class="alert alert-warning alert-dismissible" role="alert">
     <h4 class="alert-heading">There is an active event!</h4>
-    Click <a href="/event/{{ active_event.id }}" class="alert-link">here</a> to show active event.
+    Click <a href="active" class="alert-link">here</a> to show active event.
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
 </div>
 {% endif %}
+
 <h1>Events</h1>
-<button onclick="location.href='/new-event'" class="btn btn-primary" type="button">New event</button>
+<button onclick="location.href='new'" class="btn btn-primary" type="button">New event</button>
 <p><b>Existing Events</b></p>
 <ul>
   {% for ev in events %}
   <li>
-    <a href="/event/{{ ev.id }}">Event | Type: {{ ev.mode }} | from {{ ev.created.date() }}</a>
+    <a href="id/{{ ev.id }}">Event | Type: {{ ev.mode }} | from {{ ev.created.date() }}</a>
   </li>
   {% endfor %}
 </ul>

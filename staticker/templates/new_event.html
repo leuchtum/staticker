@@ -6,7 +6,7 @@
 {% if active_event_id %}
 <div class="alert alert-danger" role="alert">
     <h4 class="alert-heading">An active event already exists.</h4>
-    Als long as an event is active, you cannot create a new one. Go to the <a href="/event/{{ active_event_id }}" class="alert-link">active event</a> and deactivate it fist. 
+    Als long as an event is active, you cannot create a new one. Go to the <a href="active" class="alert-link">active event</a> and deactivate it fist. 
 </div>
 {% endif %}
 
@@ -24,7 +24,7 @@
 </div>
 {% endif %}
 
-<form id="form" action="/new-event/submit" method="post">
+<form id="form" action="new/submit" method="post">
     <div class="form-group">
         <label for="playersearch">Add players to event:</label>
         <input type="text" class="form-control" id="playersearch" autocomplete="off">

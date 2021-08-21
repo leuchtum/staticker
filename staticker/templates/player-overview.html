@@ -4,12 +4,12 @@
 
 {% block content %}
 <h1>Player</h1>
-<button onclick="location.href='/new-player'" class="btn btn-primary" type="button">New player</button>
+<button onclick="location.href='new'" class="btn btn-primary" type="button">New player</button>
 <p><b>Existing Players</b></p>
 <ul>
   {% for player in players %}
   <li>
-    <a href="/player/{{ player.id }}">{{ player.name }}</a>
+    <a href="id/{{ player.id }}">{{ player.name }}</a>
   </li>
   {% endfor %}
 </ul>
