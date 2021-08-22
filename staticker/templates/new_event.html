@@ -25,16 +25,23 @@
 {% endif %}
 
 <form id="form" action="new/submit" method="post">
+    <!-- Select type -->
+    
+    <!-- Search players -->
     <div class="form-group">
         <label for="playersearch">Add players to event:</label>
         <input type="text" class="form-control" id="playersearch" autocomplete="off">
-        <input type="hidden" id="selected_players" name="selected_players">
     </div>
+
+    <!-- Show players -->
     <div class="form-group">
         <label for="players">Added players:</label>
         <ul class="list-group" id="players"></ul>
     </div>
     <button type="submit" class="btn btn-primary" {{ "disabled='disabled'" if active_event_id }}">Create Event</button>
+
+    <!-- Hidden stuff for form submission-->
+    <input type="hidden" id="selected_players" name="selected_players">
 </form>
 {% endblock %}
 

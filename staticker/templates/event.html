@@ -6,39 +6,42 @@
 
 {% if created %}
 <div class="alert alert-success" role="alert">
-    <h4 class="alert-heading">Event successfully created.</h4>
+  <h4 class="alert-heading">Event successfully created.</h4>
 </div>
 {% endif %}
 
 <h1>Event</h1>
 <p>
-    Event with ID {{ event.id }}
+  Event with ID {{ event.id }}, status: {{ "active" if event.active else "not active" }}
 </p>
 
 <!-- Button trigger modal -->
 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
-    Deactivate
-  </button>
-  
-  <!-- Modal -->
-  <div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog" aria-labelledby="deactivateModal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deactivateModal">Deactivate</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          This cannot be undone.
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Abort</button>
-          <button type="summit" class="btn btn-danger">Deactivate</button>
-        </div>
+  Deactivate
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog" aria-labelledby="deactivateModal"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deactivateModal">Deactivate</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        This cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Abort</button>
+        <form action="{{ event.id }}/deactivate" method="post">
+          <button type="summit" class="btn btn-danger" action="/" method="get">Deactivate</button>
+        </form>
       </div>
     </div>
   </div>
+</div>
 
 {% endblock %}

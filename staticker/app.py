@@ -12,7 +12,7 @@ from .routes.game import router as game_router, active_game_action
 from .routes.player import router as player_router
 
 
-app = FastAPI()#dependencies=[Depends(manager)])
+app = FastAPI()
 app.mount("/static", StaticFiles(directory="staticker/static"), name="static")
 app.include_router(event_router)
 app.include_router(game_router)

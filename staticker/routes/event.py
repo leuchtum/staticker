@@ -41,6 +41,17 @@ async def event(request: Request, event_id: str, created: bool = False):
     return templates.TemplateResponse("event.html", dic)
 
 
+@router.post("/id/{event_id}/deactivate")
+async def deactivate(request: Request, event_id: str):
+    try:
+        ev = get_event_by_id(event_id)
+        ev.deactivate()
+    except:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    return RedirectResponse(f"/event/id/{event_id}", status_code=status.HTTP_302_FOUND)
+
+
 @router.get("/active", response_class=HTMLResponse)
 async def active_event():
     active_event = manager.get_active_event()

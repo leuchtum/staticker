@@ -1,10 +1,11 @@
 from fastapi import Request, HTTPException, Form, APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 import starlette.status as status
+import peewee
 
 from ..collections import PlayerCollection
 from ..dependencies import templates, manager
-from ..core import NotAllowedError, NotFoundError, get_player_by_id, Player
+from ..core import NotFoundError, get_player_by_id, Player
 
 
 router = APIRouter(
@@ -46,6 +47,6 @@ async def new_player_submit(_: Request, name: str = Form(...)):
     code = status.HTTP_302_FOUND
     try:
         p.save()
-    except NotAllowedError:
+    except peewee.IntegrityError:
         return RedirectResponse(url='/player/new?exists=1', status_code=code)
     return RedirectResponse(url=f"/player/id/{p.id}?created=1", status_code=code)
