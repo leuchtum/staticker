@@ -28,6 +28,26 @@ class PlayerCollection:
 class GameCollection:
     def __init__(self):
         self.games = []
+        
+    def get_formatted_games(self):
+        formatted_games = []
+        for g in self.games:
+            score = g.get_score()
+            entry = {
+                "pwd": g.pwd.name,
+                "pwo": g.pwo.name,
+                "pbd": g.pbd.name,
+                "pbo": g.pbo.name,
+                "score_w": score["w"],
+                "score_b": score["b"],
+                "created": g.created
+            }
+            formatted_games.append(entry)
+            
+        formatted_games.sort(key=lambda x: x["created"])
+        return formatted_games
+            
+
     
     
 class EventCollection:

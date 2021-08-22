@@ -5,7 +5,7 @@ import json
 
 
 from ..statistics import EventStatistics
-from ..collections import EventCollection
+from ..collections import EventCollection, GameCollection
 from ..dependencies import manager, templates
 from ..core import get_event_by_id, Event, NotAllowedError, get_player_by_name
 
@@ -34,15 +34,21 @@ async def event(request: Request, event_id: str, created: bool = False):
         ev = get_event_by_id(event_id)
     except:
         raise HTTPException(status_code=404, detail="Event not found")
-    
+
     ev_stat = EventStatistics(ev)
     main_ranking = ev_stat.get_main_ranking()
+
+    games = ev.get_games()
+    gc = GameCollection()
+    gc.games = games
+    formatted_games = gc.get_formatted_games()
     
     dic = {
         "request": request,
         "event": ev,
         "created": created,
-        "main_ranking": main_ranking
+        "main_ranking": main_ranking,
+        "games": formatted_games
     }
     return templates.TemplateResponse("event.html", dic)
 
@@ -82,6 +88,7 @@ async def new_event(request: Request, min_player_violation: bool = False, err: b
         "err": err
     }
     return templates.TemplateResponse("new_event.html", dic)
+
 
 @router.post("/new/submit")
 async def new_event_submit(selected_players: str = Form(...)):

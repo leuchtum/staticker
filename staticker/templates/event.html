@@ -5,7 +5,7 @@
 {% block content %}
 
 {% if created %}
-<div class="alert alert-success" role="alert">
+<div id="alert_created" class="alert alert-success" role="alert">
   <h4 class="alert-heading">Event successfully created.</h4>
 </div>
 {% endif %}
@@ -15,8 +15,25 @@
   Event with ID {{ event.id }}, status: {{ "active" if event.active else "not active" }}
 </p>
 
+
+
+{% if event.active %}
+<h4>Controll panel</h4>
+
+
+<button type="button" class="btn btn-success">
+  Next game
+</button>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
+  Deactivate
+</button>
+{% endif %}
+
+
 <h4>Main ranking</h4>
-<table class="table">
+
+<table class="table align-middle text-center table-responsive-sm">
   <thead>
     <tr>
       <th scope="col">#</th>
@@ -39,21 +56,50 @@
   </tbody>
 </table>
 
-{% if event.active %}
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
-  Deactivate
-</button>
+
+<h4>Played games</h4>
+<table class="table align-middle text-center table-responsive-sm">
+  <thead>
+    <tr>
+      <th scope="col">Black</td>
+      <th scope="col">Score</th>
+      <th scope="col">White</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in games %}
+    <tr>
+      <td>
+        <div>
+          DEF: {{ row["pbd"] }}
+        </div>
+        <div>
+          OFF: {{ row["pbo"] }}
+        </div>
+      </td>
+      <td>{{ row["score_b"] }}:{{ row["score_w"] }}</td>
+      <td>
+        <div>
+          DEF: {{ row["pwd"] }}
+        </div>
+        <div>
+          OFF: {{ row["pwo"] }}
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 
 <!-- Modal -->
-<div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog" aria-labelledby="deactivateModal"
-  aria-hidden="true">
+<div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="deactivateModal">Deactivate</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
@@ -68,6 +114,12 @@
     </div>
   </div>
 </div>
-{% endif %}
 
+<script>
+  window.setTimeout(function () {
+    $(".alert").fadeTo(500, 0).slideUp(500, function () {
+      $(this).remove();
+    });
+  }, 2000);
+</script>
 {% endblock %}
