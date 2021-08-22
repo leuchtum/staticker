@@ -9,11 +9,19 @@ const Item = (name) => `
 </li>
 `;
 
+
+function sort_case_sensitive(array) {
+    return array.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    }); 
+}
+
 function onSelectItem(item) {
     if (!selected.includes(item.label)) {
         selected.push(item.label);
         var todo = document.getElementById("players");
-        todo.innerHTML = selected.sort().map(Item).join("");
+        selected = sort_case_sensitive(selected)
+        todo.innerHTML = selected.map(Item).join("");
     }
     document.getElementById("playersearch").value = "";
 }

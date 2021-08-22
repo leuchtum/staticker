@@ -4,6 +4,7 @@ import starlette.status as status
 import json
 
 
+from ..statistics import EventStatistics
 from ..collections import EventCollection
 from ..dependencies import manager, templates
 from ..core import get_event_by_id, Event, NotAllowedError, get_player_by_name
@@ -33,10 +34,15 @@ async def event(request: Request, event_id: str, created: bool = False):
         ev = get_event_by_id(event_id)
     except:
         raise HTTPException(status_code=404, detail="Event not found")
+    
+    ev_stat = EventStatistics(ev)
+    main_ranking = ev_stat.get_main_ranking()
+    
     dic = {
         "request": request,
         "event": ev,
-        "created": created
+        "created": created,
+        "main_ranking": main_ranking
     }
     return templates.TemplateResponse("event.html", dic)
 

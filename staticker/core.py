@@ -40,6 +40,15 @@ class Event(BaseModel): # TODO Rewrite JsonField? Games now have parent Event ID
     mode = CharField()
     elements = JSONField(default={"p": [], "g": []})
     active = BooleanField(default=False)
+    
+    def get_player(self):
+        player_ids = self.elements["p"]
+        return get_multiple_player_by_id(player_ids)
+    
+    def get_games(self, finished=False):
+        game_ids = self.elements["g"]
+        games =  get_multiple_games_by_id(game_ids)
+        return [g for g in games if g.finished]
 
     def add_player(self, player):
         if self._is_active():
@@ -290,6 +299,20 @@ class Game(BaseModel): # TODO process event
         ow = counters["owd"] + counters["owo"]
 
         return {"b": gb + ow, "w": gw + ob}
+    
+    def get_winner_and_loser(self):
+        if not self.finished:
+            raise NotAllowedError("Game is not finished")
+        
+        dic = {"winner":[], "loser":[]}
+        score = self.get_score()
+        for p in self.get_player():
+            side = self.get_side_by_player(p)
+            if score[side] == self.playto:
+                dic["winner"].append(p)
+            else:
+                dic["loser"].append(p)
+        return dic
 
     def _update_pre(self):
         if self.history and not self.started:
@@ -348,6 +371,9 @@ class Game(BaseModel): # TODO process event
         self.save()
         logger.debug(f"Switched {log_str} side of Game[{self}].")
 
+    def get_player(self):
+        return [self.pwd, self.pwo, self.pbd, self.pbo]
+    
     def get_player_ids(self, side=None):
         b = set((self.pbd.id, self.pbo.id))
         w = set((self.pwd.id, self.pwo.id))

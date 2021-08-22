@@ -15,6 +15,31 @@
   Event with ID {{ event.id }}, status: {{ "active" if event.active else "not active" }}
 </p>
 
+<h4>Main ranking</h4>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Played</th>
+      <th scope="col">Won</th>
+      <th scope="col">Lost</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in main_ranking %}
+    <tr>
+      <th scope="row">{{ row["ranking"] }}</th>
+      <td>{{ row["name"] }}</td>
+      <td>{{ row["played"] }}</td>
+      <td>{{ row["won"] }}</td>
+      <td>{{ row["lost"] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if event.active %}
 <!-- Button trigger modal -->
 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
   Deactivate
@@ -43,5 +68,6 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 {% endblock %}
