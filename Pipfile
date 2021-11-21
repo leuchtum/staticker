@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+peewee = "*"
+fastapi = "*"
+uvicorn = "*"
+aiofiles = "*"
+jinja2 = "*"
+pyserial-asyncio = "*"
+pandas = "*"
+python-multipart = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
