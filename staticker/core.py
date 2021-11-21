@@ -189,8 +189,12 @@ class Game(BaseModel): # TODO process event
     def add_player(self, black, white):
         assert type(black) == list
         assert type(white) == list
-        assert any(p in white for p in black) == False
-
+        
+        try:
+            assert any(p in white for p in black) == False
+        except AssertionError:
+            raise NotAllowedError("Player on both sides is not allowed")
+            
         # Add black players
         if len(black) == 1:
             self.pbd = black[0]
@@ -372,7 +376,10 @@ class Game(BaseModel): # TODO process event
         logger.debug(f"Switched {log_str} side of Game[{self}].")
 
     def get_player(self):
-        return [self.pwd, self.pwo, self.pbd, self.pbo]
+        return list(set([self.pwd, self.pwo, self.pbd, self.pbo]))
+    
+    def get_player_history(self, history):
+        pass
     
     def get_player_ids(self, side=None):
         b = set((self.pbd.id, self.pbo.id))

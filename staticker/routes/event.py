@@ -97,7 +97,7 @@ async def new_event_submit(selected_players: str = Form(...)):
     if len(selected_players) < 2:
         url = '/event/new?min_player_violation=true'
     else:
-        ev = Event(mode="TEST")
+        ev = Event(mode="free") 
         try:
             ev.activate()
             player = [get_player_by_name(name)

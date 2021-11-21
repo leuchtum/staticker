@@ -18,13 +18,12 @@
 
 
 {% if event.active %}
-<h4>Controll panel</h4>
+<h4>Control panel</h4>
 
-
-<button type="button" class="btn btn-success">
-  Next game
-</button>
 <!-- Button trigger modal -->
+<button type="button" class="btn btn-success" data-toggle="modal" data-target="#newGameModal">
+  New game
+</button>
 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
   Deactivate
 </button>
@@ -70,21 +69,33 @@
     {% for row in games %}
     <tr>
       <td>
+        {% if row["pbd"] == row["pbo"] %}
+        <div>
+          {{ row["pbd"] }}
+        </div>
+        {% else %}
         <div>
           DEF: {{ row["pbd"] }}
         </div>
         <div>
           OFF: {{ row["pbo"] }}
         </div>
+        {% endif %}
       </td>
       <td>{{ row["score_b"] }}:{{ row["score_w"] }}</td>
       <td>
+        {% if row["pwd"] == row["pwo"] %}
+        <div>
+          {{ row["pwd"] }}
+        </div>
+        {% else %}
         <div>
           DEF: {{ row["pwd"] }}
         </div>
         <div>
           OFF: {{ row["pwo"] }}
         </div>
+        {% endif %}
       </td>
     </tr>
     {% endfor %}
@@ -92,7 +103,7 @@
 </table>
 
 
-<!-- Modal -->
+<!-- Modal deactivate-->
 <div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -108,12 +119,77 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Abort</button>
         <form action="{{ event.id }}/deactivate" method="post">
-          <button type="summit" class="btn btn-danger" action="/" method="get">Deactivate</button>
+          <button type="summit" class="btn btn-danger">Deactivate</button>
         </form>
       </div>
     </div>
   </div>
 </div>
+
+
+<!-- Modal new game-->
+<div class="modal fade" id="newGameModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="newGameModal">New game</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <form action="/game/new/submit" method="post">
+        <div class="modal-body">
+
+          <div>
+            <label for="pwd">White</label>
+            <select id="pwd" name="pwd" class="form-control">
+              <option>Select defense player</option>
+              {% for row in main_ranking %}
+              <option value={{ row["name"] }}>{{ row["name"] }}</option>
+              {% endfor %}
+            </select>
+            <select id="pwo" name="pwo" class="form-control">
+              <option>Select offense player</option>
+              {% for row in main_ranking %}
+              <option value={{ row["name"] }}>{{ row["name"] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label for="pbd">Black</label>
+            <select id="pbd" name="pbd" class="form-control">
+              <option>Select defense player</option>
+              {% for row in main_ranking %}
+              <option value={{ row["name"] }}>{{ row["name"] }}</option>
+              {% endfor %}
+            </select>
+            <select id="pbo" name="pbo" class="form-control">
+              <option>Select offense player</option>
+              {% for row in main_ranking %}
+              <option value={{ row["name"] }}>{{ row["name"] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Abort</button>
+          <button type="summit" class="btn btn-success">Start game</button>
+        </div>
+
+        <!-- Hidden stuff for form submission-->
+        <input type="hidden" id="from_event" name="from_event" value={{ event.id }}>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
 
 <script>
   window.setTimeout(function () {
