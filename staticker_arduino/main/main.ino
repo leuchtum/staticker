@@ -9,8 +9,18 @@ bool serial_input_string_complete = false;
 
 // LED General
 const int ARRAYLEN = 10;
+
+// LED GoalWhiteDefense
 const int WD_LED_PIN = 7;
 Adafruit_NeoPixel wd_led(ARRAYLEN, WD_LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// LED ScoreWhite
+const int WS_LED_PIN = 19;
+Adafruit_NeoPixel ws_led(ARRAYLEN, WS_LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// LED ScoreBlack
+const int BS_LED_PIN = 18;
+Adafruit_NeoPixel bs_led(ARRAYLEN, BS_LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // Button General
 const int DEBOUNCETIME = 30;
@@ -38,6 +48,14 @@ void setup() {
   wd_led.clear();
   wd_led.show();
 
+  ws_led.begin();
+  ws_led.clear();
+  ws_led.show();
+  
+  bs_led.begin();
+  bs_led.clear();
+  bs_led.show();
+  
   // Init button objects
   gwd_button.attach (GWD_BUTTON_PIN,INPUT_PULLUP);
   gwd_button.interval(DEBOUNCETIME);
@@ -148,6 +166,12 @@ void decode_serial_input(){
       if (pos == "wd"){
         set_led(wd_led, red, green, blue);
       }
+      else if (pos == "ws"){
+        set_led(ws_led, red, green, blue);
+      }
+      else if (pos == "bs"){
+        set_led(bs_led, red, green, blue);
+      }
       send("echo","setled");
     }
     else{
@@ -161,9 +185,23 @@ void decode_serial_input(){
       wd_led.show();
       send("echo","clear wd");
     }
+    else if (msg == "ws"){
+      ws_led.clear();
+      ws_led.show();
+      send("echo","clear wd");
+    }
+    else if (msg == "bs"){
+      bs_led.clear();
+      bs_led.show();
+      send("echo","clear wd");
+    }
     else if (msg == "all"){
       wd_led.clear();
       wd_led.show();
+      ws_led.clear();
+      ws_led.show();
+      bs_led.clear();
+      bs_led.show();
       send("echo","clear all");
     }
     else{
