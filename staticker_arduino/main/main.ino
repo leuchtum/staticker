@@ -2,7 +2,6 @@
 #include <Bounce2.h>
 #include <Adafruit_NeoPixel.h>
 
-
 // Serial input
 String serial_input_string = "";
 bool serial_input_string_complete = false;
@@ -10,15 +9,27 @@ bool serial_input_string_complete = false;
 // LED General
 const int ARRAYLEN = 10;
 
-// LED GoalWhiteDefense
-const int WD_LED_PIN = 7;
+// LED WhiteDefense
+const int WD_LED_PIN = 4;
 Adafruit_NeoPixel wd_led(ARRAYLEN, WD_LED_PIN, NEO_GRB + NEO_KHZ800);
 
-// LED ScoreWhite
+// LED WhiteOffense
+const int WO_LED_PIN = 7;
+Adafruit_NeoPixel wo_led(ARRAYLEN, WO_LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// LED WhiteScore
 const int WS_LED_PIN = 19;
 Adafruit_NeoPixel ws_led(ARRAYLEN, WS_LED_PIN, NEO_GRB + NEO_KHZ800);
 
-// LED ScoreBlack
+// LED BlackDefense
+const int BD_LED_PIN = 10;
+Adafruit_NeoPixel bd_led(ARRAYLEN, BD_LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// LED BlackOffense
+const int BO_LED_PIN = 13;
+Adafruit_NeoPixel bo_led(ARRAYLEN, BO_LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// LED BlackScore
 const int BS_LED_PIN = 18;
 Adafruit_NeoPixel bs_led(ARRAYLEN, BS_LED_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -27,19 +38,55 @@ const int DEBOUNCETIME = 30;
 const int UNDOTIME = 1500;
 
 // Button GoalWhiteDefense
-const int GWD_BUTTON_PIN = 6;
+const int GWD_BUTTON_PIN = 3;
 Bounce2::Button gwd_button = Bounce2::Button();
 int gwd_press_started = 0;
 bool gwd_sended = true;
 
 // Button OwnerWhiteDefense
-const int OWD_BUTTON_PIN = 5;
+const int OWD_BUTTON_PIN = 2;
 Bounce2::Button owd_button = Bounce2::Button();
 int owd_press_started = 0;
 bool owd_sended = true;
 
+// Button GoalWhiteOffense
+const int GWO_BUTTON_PIN = 6;
+Bounce2::Button gwo_button = Bounce2::Button();
+int gwo_press_started = 0;
+bool gwo_sended = true;
+
+// Button OwnerWhiteOffense
+const int OWO_BUTTON_PIN = 5;
+Bounce2::Button owo_button = Bounce2::Button();
+int owo_press_started = 0;
+bool owo_sended = true;
+
+// Button GoalBlackDefense
+const int GBD_BUTTON_PIN = 9;
+Bounce2::Button gbd_button = Bounce2::Button();
+int gbd_press_started = 0;
+bool gbd_sended = true;
+
+// Button OwnerBlackDefense
+const int OBD_BUTTON_PIN = 8;
+Bounce2::Button obd_button = Bounce2::Button();
+int obd_press_started = 0;
+bool obd_sended = true;
+
+// Button GoalBlackOffense
+const int GBO_BUTTON_PIN = 12;
+Bounce2::Button gbo_button = Bounce2::Button();
+int gbo_press_started = 0;
+bool gbo_sended = true;
+
+// Button OwnerBlackOffense
+const int OBO_BUTTON_PIN = 11;
+Bounce2::Button obo_button = Bounce2::Button();
+int obo_press_started = 0;
+bool obo_sended = true;
+
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   // reserve 200 bytes for the serial_input_string:
   serial_input_string.reserve(200);
 
@@ -47,23 +94,58 @@ void setup() {
   wd_led.begin();
   wd_led.clear();
   wd_led.show();
-
+  
+  wo_led.begin();
+  wo_led.clear();
+  wo_led.show();
+  
   ws_led.begin();
   ws_led.clear();
-  ws_led.show();
+  ws_led.show();  
   
+  bd_led.begin();
+  bd_led.clear();
+  bd_led.show();
+
+  bo_led.begin();
+  bo_led.clear();
+  bo_led.show();
+
   bs_led.begin();
   bs_led.clear();
   bs_led.show();
+  
   
   // Init button objects
   gwd_button.attach (GWD_BUTTON_PIN,INPUT_PULLUP);
   gwd_button.interval(DEBOUNCETIME);
   gwd_button.setPressedState(LOW);
-
   owd_button.attach (OWD_BUTTON_PIN,INPUT_PULLUP);
   owd_button.interval(DEBOUNCETIME);
   owd_button.setPressedState(LOW); 
+
+  gwo_button.attach (GWO_BUTTON_PIN,INPUT_PULLUP);
+  gwo_button.interval(DEBOUNCETIME);
+  gwo_button.setPressedState(LOW);
+  owo_button.attach (OWO_BUTTON_PIN,INPUT_PULLUP);
+  owo_button.interval(DEBOUNCETIME);
+  owo_button.setPressedState(LOW);
+  
+  gbd_button.attach (GBD_BUTTON_PIN,INPUT_PULLUP);
+  gbd_button.interval(DEBOUNCETIME);
+  gbd_button.setPressedState(LOW);
+  obd_button.attach (OBD_BUTTON_PIN,INPUT_PULLUP);
+  obd_button.interval(DEBOUNCETIME);
+  obd_button.setPressedState(LOW);
+
+  
+  gbo_button.attach (GBO_BUTTON_PIN,INPUT_PULLUP);
+  gbo_button.interval(DEBOUNCETIME);
+  gbo_button.setPressedState(LOW);
+  obo_button.attach (OBO_BUTTON_PIN,INPUT_PULLUP);
+  obo_button.interval(DEBOUNCETIME);
+  obo_button.setPressedState(LOW);
+  
 }
 
 
@@ -74,6 +156,16 @@ void loop() {
   // Check buttons
   check_button(gwd_button, gwd_press_started, gwd_sended, "gwd");
   check_button(owd_button, owd_press_started, owd_sended, "owd");
+  
+  check_button(gwo_button, gwo_press_started, gwo_sended, "gwo");
+  check_button(owo_button, owo_press_started, owo_sended, "owo");
+  
+  check_button(gbd_button, gbd_press_started, gbd_sended, "gbd");
+  check_button(obd_button, obd_press_started, obd_sended, "obd");
+  
+  check_button(gbo_button, gbo_press_started, gbo_sended, "gbo");
+  check_button(obo_button, obo_press_started, obo_sended, "obo");
+  
 }
 
 
@@ -166,12 +258,22 @@ void decode_serial_input(){
       if (pos == "wd"){
         set_led(wd_led, red, green, blue);
       }
+      else if (pos == "wo"){
+        set_led(wo_led, red, green, blue);
+      }
       else if (pos == "ws"){
         set_led(ws_led, red, green, blue);
+      }
+      else if (pos == "bd"){
+        set_led(bd_led, red, green, blue);
+      }
+      else if (pos == "bo"){
+        set_led(bo_led, red, green, blue);
       }
       else if (pos == "bs"){
         set_led(bs_led, red, green, blue);
       }
+      
       send("echo","setled");
     }
     else{
@@ -185,23 +287,51 @@ void decode_serial_input(){
       wd_led.show();
       send("echo","clear wd");
     }
+    else if (msg == "wo"){
+      wo_led.clear();
+      wo_led.show();
+      send("echo","clear wo");
+    }
     else if (msg == "ws"){
       ws_led.clear();
       ws_led.show();
-      send("echo","clear wd");
+      send("echo","clear ws");
+    }
+    else if (msg == "bd"){
+      bd_led.clear();
+      bd_led.show();
+      send("echo","clear bd");
+    }
+    else if (msg == "bo"){
+      bo_led.clear();
+      bo_led.show();
+      send("echo","clear bo");
     }
     else if (msg == "bs"){
       bs_led.clear();
       bs_led.show();
-      send("echo","clear wd");
+      send("echo","clear bs");
     }
+    
     else if (msg == "all"){
       wd_led.clear();
       wd_led.show();
+
+      wo_led.clear();
+      wo_led.show();
+      
       ws_led.clear();
       ws_led.show();
+      
+      bd_led.clear();
+      bd_led.show();
+      
+      bo_led.clear();
+      bo_led.show();
+      
       bs_led.clear();
       bs_led.show();
+      
       send("echo","clear all");
     }
     else{
