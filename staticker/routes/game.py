@@ -40,7 +40,8 @@ async def active_game():
 @router.post("/active/{action}")
 async def active_game_action(action: str):
     try:
-        allowed = ["gbd", "gbo", "gwd", "gwo", "obd", "obo", "owd", "owo", "undo"]
+        allowed = ["gbd", "gbo", "gwd", "gwo", "obd", "obo", "owd", "owo"]
+        allowed += [f"{i}_undo" for i in allowed]
         assert action in allowed
     except AssertionError:
         raise HTTPException(status_code=400, detail="Invalid command")
