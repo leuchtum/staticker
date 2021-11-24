@@ -9,6 +9,18 @@
     Please enter a different name.
 </div>
 {% endif %}
+{% if errchars %}
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <h4 class="alert-heading">Name not allowed.</h4>
+    Please use only the following symbols:
+    <ul>
+        <li>a-z as well as ä,ö,ü</li>
+        <li>A-Z as well as Ä,Ö,Ü</li>
+        <li>0-9</li>
+        <li>_</li>
+    </ul>
+</div>
+{% endif %}
 <form action="new/submit" method="post">
     <div class="form-group">
         <label for="name">Enter name</label>
