@@ -2,9 +2,10 @@ from asyncio import get_event_loop
 import asyncio
 from serial_asyncio import open_serial_connection
 
+
 class ArduinoAsyncSerial:
     def __init__(self):
-        self.url = '/dev/ttyACM0'
+        self.url = "/dev/ttyACM0"
         self.baudrate = 9600
         self.reader = None
         self.writer = None
@@ -15,11 +16,12 @@ class ArduinoAsyncSerial:
 
     async def _listen(self):
         self.reader, self.writer = await open_serial_connection(
-            url=self.url, baudrate=self.baudrate)
+            url=self.url, baudrate=self.baudrate
+        )
         while True:
             rawline = await self.reader.readline()
             try:
-                line = str(rawline, 'utf-8')
+                line = str(rawline, "utf-8")
                 dic = self.decode(line)
             except:
                 dic = None
@@ -28,7 +30,7 @@ class ArduinoAsyncSerial:
 
     async def _write(self, string):
         try:
-            b = string.encode() + b''
+            b = string.encode() + b""
             self.writer.write(b)
         except Exception as e:
             raise e
@@ -42,12 +44,14 @@ class ArduinoAsyncSerial:
     def decode(self, string):
         return {}
 
+
 async def write_serial():
     while True:
         await asyncio.sleep(2)
         print("write")
         await ard._write("!")
-        
+
+
 ard = ArduinoAsyncSerial()
 ard.register_read_process(print)
 ard.start_listen()

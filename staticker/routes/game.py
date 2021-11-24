@@ -5,13 +5,16 @@ import starlette.status as status
 
 from ..communication import arduino
 from ..dependencies import manager, templates
-from ..core import Game, NotAllowedError, get_game_by_id, NotFoundError, get_player_by_name
-
-
-router = APIRouter(
-    prefix="/game",
-    tags=["game"]
+from ..core import (
+    Game,
+    NotAllowedError,
+    get_game_by_id,
+    NotFoundError,
+    get_player_by_name,
 )
+
+
+router = APIRouter(prefix="/game", tags=["game"])
 
 
 @router.get("/id/{game_id}", response_class=HTMLResponse)
@@ -37,8 +40,7 @@ async def active_game():
 @router.post("/active/{action}")
 async def active_game_action(action: str):
     try:
-        allowed = ["gbd", "gbo", "gwd", "gwo",
-                   "obd", "obo", "owd", "owo", "undo"]
+        allowed = ["gbd", "gbo", "gwd", "gwo", "obd", "obo", "owd", "owo", "undo"]
         assert action in allowed
     except AssertionError:
         raise HTTPException(status_code=400, detail="Invalid command")
@@ -47,18 +49,24 @@ async def active_game_action(action: str):
 
     if active_game:
         if action == "undo":
-            raise(NotImplementedError)
+            raise (NotImplementedError)
         else:
             active_game.goal_and_owner_by_key(action)
-            #position = action[1:]
-            #player_history = active_game.get_player_history(position)
-            #await arduino.set_leds(position, player_history)
+            # position = action[1:]
+            # player_history = active_game.get_player_history(position)
+            # await arduino.set_leds(position, player_history)
     else:
         raise HTTPException(status_code=404, detail="No active game")
 
 
 @router.post("/new/submit")
-async def new_game_submit(pwd: str = Form(...), pwo: str = Form(...), pbd: str = Form(...), pbo: str = Form(...), from_event: int = Form(...)):
+async def new_game_submit(
+    pwd: str = Form(...),
+    pwo: str = Form(...),
+    pbd: str = Form(...),
+    pbo: str = Form(...),
+    from_event: int = Form(...),
+):
     try:
         pwd = get_player_by_name(pwd)
         pwo = get_player_by_name(pwo)
@@ -66,7 +74,7 @@ async def new_game_submit(pwd: str = Form(...), pwo: str = Form(...), pbd: str =
         pbo = get_player_by_name(pbo)
     except NotFoundError:
         raise HTTPException(status_code=404, detail="Player not found")
-    
+
     ev = manager.get_active_event()
     active_game = manager.get_active_game()
 
@@ -77,11 +85,11 @@ async def new_game_submit(pwd: str = Form(...), pwo: str = Form(...), pbd: str =
         raise HTTPException(status_code=404, detail="No active event")
 
     game = Game(event_id=from_event)
-    
+
     try:
-        pw = [pwd] if pwd==pwo else [pwd,pwo]
-        pb = [pbd] if pbd==pbo else [pbd,pbo]
-        game.add_player(pw,pb)
+        pw = [pwd] if pwd == pwo else [pwd, pwo]
+        pb = [pbd] if pbd == pbo else [pbd, pbo]
+        game.add_player(pw, pb)
     except NotAllowedError:
         raise HTTPException(status_code=403, detail="Player only on one side allowed")
 

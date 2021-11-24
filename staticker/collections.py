@@ -14,21 +14,21 @@ class PlayerCollection:
     def get_sorted(self, sort_by):
         self.player.sort(key=lambda p: p.name.lower())
         return self.player
-    
+
     def get_names(self):
         return [p.name for p in self.player]
 
     def get_player(self):
         return self.player
-    
+
     def get_names_with_ids(self):
-        return {p.name : p.id for p in self.player}
-    
-    
+        return {p.name: p.id for p in self.player}
+
+
 class GameCollection:
     def __init__(self):
         self.games = []
-        
+
     def get_formatted_games(self):
         formatted_games = []
         for g in self.games:
@@ -40,16 +40,14 @@ class GameCollection:
                 "pbo": g.pbo.name,
                 "score_w": score["w"],
                 "score_b": score["b"],
-                "created": g.created
+                "created": g.created,
             }
             formatted_games.append(entry)
-            
+
         formatted_games.sort(key=lambda x: x["created"])
         return formatted_games
-            
 
-    
-    
+
 class EventCollection:
     def __init__(self):
         self.events = []

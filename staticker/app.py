@@ -37,7 +37,7 @@ async def app_root(request: Request):
     dic = {
         "request": request,
         "active_event": manager.get_active_event(),
-        "active_game": manager.get_active_game()
+        "active_game": manager.get_active_game(),
     }
     return templates.TemplateResponse("home.html", dic)
 
@@ -59,6 +59,6 @@ async def app_data(request: Request, obj: str, load_all: str = False):
             pc.load_all(sort_by="name")
             return pc.get_names_with_ids()
         else:
-            raise(NotImplementedError)
+            raise (NotImplementedError)
     else:
-        raise(NotImplementedError)
+        raise (NotImplementedError)

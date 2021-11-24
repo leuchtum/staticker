@@ -7,8 +7,7 @@ FOLDER_NAME = ".staticker"
 DATABASE_NAME = "staticker.db"
 
 
-class DBDirectory():
-
+class DBDirectory:
     def __init__(self):
 
         self.os = platform.system()
@@ -29,7 +28,7 @@ class DBDirectory():
         if self.db_path.exists():
             self.db_path.unlink()
             logger.debug(f"Deleted database {self.db_path}")
-            
+
     def del_folder(self):
         if self.folder_path.exists():
             shutil.rmtree(str(self.folder_path))

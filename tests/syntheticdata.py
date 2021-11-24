@@ -2,6 +2,7 @@ from staticker.core import Player, Event, Game, new_player, new_game
 import random
 from peewee import fn
 
+
 def get_random_name():
     names = [
         "Alpha",
@@ -29,7 +30,7 @@ def get_random_name():
         "Wiskey",
         "X-Ray",
         "Yankee",
-        "Zulu"
+        "Zulu",
     ]
     decimals = random.choices([str(i) for i in range(10)], k=8)
     name = random.choices(names, k=2)
@@ -82,18 +83,18 @@ def play_synthetic_event(n_player, n_games):
                 g.goal(side, slot)
             elif how == "o":
                 g.owner(side, slot)
-        
+
     ev.deactivate()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     n_new_players = 5
     n_games = 20
 
     evs = [ev for ev in Event.select()]
     for ev in evs:
         ev.deactivate()
-        
+
     new_players(n_new_players)
 
     play_synthetic_event(4, n_games)

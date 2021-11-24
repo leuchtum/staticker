@@ -11,7 +11,7 @@ ARRAYLEN = 10
 
 class ArduinoAsyncSerial:
     def __init__(self):
-        self.url = '/dev/ttyACM0'
+        self.url = "/dev/ttyACM0"
         self.baudrate = 115200
         self.reader = None
         self.writer = None
@@ -29,29 +29,27 @@ class ArduinoAsyncSerial:
 
     async def _open_connection(self):
         self.reader, self.writer = await open_serial_connection(
-            url=self.url, baudrate=self.baudrate)
+            url=self.url, baudrate=self.baudrate
+        )
 
     async def _listen(self):
         try:
             while True:
                 rawline = await self.reader.readline()
                 try:
-                    line = str(rawline, 'utf-8')
+                    line = str(rawline, "utf-8")
                     dic = json.loads(line)
                 except:
                     logger.warning("Received unreadable JSON.")
                 else:
                     asyncio.create_task(self._decode(dic))
                     logger.debug(f"Received package {dic}.")
-                    
+
         except Exception as e:  # TODO
             self.available = False
 
     async def _write(self, mode, msg):
-        package = {
-            "mode": mode,
-            "msg": msg
-        }
+        package = {"mode": mode, "msg": msg}
         raw = (str(json.dumps(package)) + "\n").encode()
 
         try:
@@ -85,10 +83,7 @@ class ArduinoAsyncSerial:
                 leds[i] = RED
             else:
                 raise ValueError
-        msg = {
-            "position": position,
-            "leds": leds
-        }
+        msg = {"position": position, "leds": leds}
         await self._write("setled", msg)
 
 

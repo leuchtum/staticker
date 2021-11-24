@@ -1,12 +1,12 @@
 from .core import Event
-from fastapi.templating import Jinja2Templates 
+from fastapi.templating import Jinja2Templates
 
 
 class Manager:
     def __init__(self):
         self.active_event = None
         self.active_game = None
-        
+
         self._update_active_event()
 
     def _update_active_event(self):

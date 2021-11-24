@@ -1,5 +1,5 @@
-#from asyncio import get_event_loop
-#from serial_asyncio import open_serial_connection
+# from asyncio import get_event_loop
+# from serial_asyncio import open_serial_connection
 
 
 def decode(string):
@@ -14,19 +14,20 @@ def decode(string):
             dic[key] = val
         return dic
     else:
-        raise(Exception("Faulty message."))
+        raise (Exception("Faulty message."))
 
 
 async def run():
-    reader, writer = await open_serial_connection(url='/dev/ttyACM0', baudrate=9600)
+    reader, writer = await open_serial_connection(url="/dev/ttyACM0", baudrate=9600)
     while True:
         rawline = await reader.readline()
-        line = str(rawline, 'utf-8')
+        line = str(rawline, "utf-8")
         try:
             dic = decode(line)
         except:
             dic = None
         print(dic)
+
 
 loop = get_event_loop()
 loop.run_until_complete(run())

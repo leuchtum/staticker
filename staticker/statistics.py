@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-class EventStatistics():
+class EventStatistics:
     def __init__(self, event):
         self.event = event
 
@@ -15,9 +15,11 @@ class EventStatistics():
         self.gc.games = self.event.get_games(finished=True)
 
         self.ranking = pd.DataFrame(
-            data=[{"player": p, "name": p.name, "name_lower_case": p.name.lower()}
-                  for p in self.pc.player],
-            index=[p.id for p in self.pc.player]
+            data=[
+                {"player": p, "name": p.name, "name_lower_case": p.name.lower()}
+                for p in self.pc.player
+            ],
+            index=[p.id for p in self.pc.player],
         )
 
     def games_played(self):
@@ -26,10 +28,10 @@ class EventStatistics():
     def _count(self):
         metrics_names = ["played", "won", "lost"]
 
-        zeros = np.zeros(
-            (self.ranking.shape[0], len(metrics_names)), dtype=int)
+        zeros = np.zeros((self.ranking.shape[0], len(metrics_names)), dtype=int)
         metrics = pd.DataFrame(
-            data=zeros, columns=metrics_names, index=self.ranking.index)
+            data=zeros, columns=metrics_names, index=self.ranking.index
+        )
 
         self.ranking = self.ranking.join(metrics)
 
@@ -45,12 +47,12 @@ class EventStatistics():
 
     def get_main_ranking(self):
         self._count()
-        
+
         main_info = ["ranking", "name", "played", "won", "lost"]
         sort_by = ["won", "lost", "played", "name_lower_case"]
         ascending = [False, True, False, True]
-        
+
         ranking = self.ranking.sort_values(sort_by, ascending=ascending)
         ranking["ranking"] = range(1, len(ranking) + 1)
-        
+
         return ranking[main_info].to_dict(orient="records")
