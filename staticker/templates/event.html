@@ -21,11 +21,14 @@
 <h4>Control panel</h4>
 
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-success" data-toggle="modal" data-target="#newGameModal">
-  New game
+<button onclick="location.href = '/game/active';" id="showGame" type="button" class="btn btn-primary">
+  Show active game
+</button>
+<button id="createGame" type="button" class="btn btn-success" data-toggle="modal" data-target="#newGameModal">
+  Create new game
 </button>
 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
-  Deactivate
+  Deactivate event
 </button>
 {% endif %}
 
@@ -145,13 +148,13 @@
           <div>
             <label for="pwd">White</label>
             <select id="pwd" name="pwd" class="form-control">
-              <option>Select defense player</option>
+              <option value="" disabled selected>Select defense player</option>
               {% for row in main_ranking %}
               <option value={{ row["name"] }}>{{ row["name"] }}</option>
               {% endfor %}
             </select>
             <select id="pwo" name="pwo" class="form-control">
-              <option>Select offense player</option>
+              <option value="" disabled selected>Select offense player</option>
               {% for row in main_ranking %}
               <option value={{ row["name"] }}>{{ row["name"] }}</option>
               {% endfor %}
@@ -161,13 +164,13 @@
           <div>
             <label for="pbd">Black</label>
             <select id="pbd" name="pbd" class="form-control">
-              <option>Select defense player</option>
+              <option value="" disabled selected>Select defense player</option>
               {% for row in main_ranking %}
               <option value={{ row["name"] }}>{{ row["name"] }}</option>
               {% endfor %}
             </select>
             <select id="pbo" name="pbo" class="form-control">
-              <option>Select offense player</option>
+              <option value="" disabled selected>Select offense player</option>
               {% for row in main_ranking %}
               <option value={{ row["name"] }}>{{ row["name"] }}</option>
               {% endfor %}
@@ -178,7 +181,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Abort</button>
-          <button type="summit" class="btn btn-success">Start game</button>
+          <button type="summit" class="btn btn-success" disabled="disabled" id="startBtn">Start game</button>
         </div>
 
         <!-- Hidden stuff for form submission-->
@@ -188,14 +191,56 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
-
-
+{% block scripts %}
 <script>
   window.setTimeout(function () {
     $(".alert").fadeTo(500, 0).slideUp(500, function () {
       $(this).remove();
     });
   }, 2000);
+
+  $(function () {
+    checkForActiveGame();
+    setInterval(checkForActiveGame, 1000);
+  });
+
+  function checkForActiveGame() {
+    fetch('/data/active_game')
+      .then(response => response.json())
+      .then(data => {
+        if (data) {
+          $('#showGame').prop('disabled', false);
+          $('#createGame').prop('disabled', 'disabled');
+        } else {
+          $('#showGame').prop('disabled', 'disabled');
+          $('#createGame').prop('disabled', false);
+        }
+      });
+  }
+
+  function checkValues() {
+    var pwd = $('#pwd').val();
+    var pwo = $('#pwo').val();
+    var pbd = $('#pbd').val();
+    var pbo = $('#pbo').val();
+    if (![pwd, pwo, pbd, pbo].includes(null)) {
+      $('#startBtn').prop('disabled', false);
+    }
+  }
+
+  $('#pwd').on('change', function () {
+    checkValues();
+  });
+  $('#pwo').on('change', function () {
+    checkValues();
+  });
+  $('#pbd').on('change', function () {
+    checkValues();
+  });
+  $('#pbo').on('change', function () {
+    checkValues();
+  });
 </script>
 {% endblock %}

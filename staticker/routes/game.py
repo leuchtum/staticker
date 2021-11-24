@@ -49,7 +49,7 @@ async def active_game_action(action: str):
     active_game = manager.get_active_game()
 
     if active_game:
-        if action == "undo":
+        if "undo" in action:
             raise (NotImplementedError)
         else:
             active_game.goal_and_owner_by_key(action)

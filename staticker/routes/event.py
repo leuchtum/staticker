@@ -54,9 +54,13 @@ async def event(request: Request, event_id: str, created: bool = False):
 async def deactivate(request: Request, event_id: str):
     try:
         ev = get_event_by_id(event_id)
-        ev.deactivate()
     except:
         raise HTTPException(status_code=404, detail="Event not found")
+
+    try:
+        ev.deactivate()
+    except:
+        raise HTTPException(status_code=404, detail="There is an active game")
 
     return RedirectResponse(f"/event/id/{event_id}", status_code=status.HTTP_302_FOUND)
 

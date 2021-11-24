@@ -60,5 +60,11 @@ async def app_data(request: Request, obj: str, load_all: str = False):
             return pc.get_names_with_ids()
         else:
             raise (NotImplementedError)
+    elif obj == "active_game":
+        active_game = manager.get_active_game()
+        if active_game:
+            return active_game.id
+        else:
+            return False
     else:
         raise (NotImplementedError)
