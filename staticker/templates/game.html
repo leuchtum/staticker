@@ -8,11 +8,31 @@
 <p>Game with ID {{ game.id }}</p>
 
 <p><b>Score</b></p>
-<p>Black: {{ game.get_score()["b"] }}</p>
-<p>White: {{ game.get_score()["w"] }}</p>
+<p>Black: <span id="score_black"></span></p>
+<p>White: <span id="score_white"></span></p>
 <p><b>Player</b></p>
 <p>Black defense: {{ game.pbd.name }}</p>
 <p>Black offense: {{ game.pbo.name }}</p>
 <p>White defense: {{ game.pwd.name }}</p>
 <p>White offense: {{ game.pwo.name }}</p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(function () {
+        checkScore()
+        setInterval(checkScore, 1000);
+    });
+
+    function checkScore() {
+        fetch('/data/game_score?game_id={{ game.id }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    document.getElementById("score_white").textContent = data["w"];
+                    document.getElementById("score_black").textContent = data["b"];
+                }
+            });
+    }
+</script>
 {% endblock %}

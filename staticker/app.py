@@ -11,6 +11,8 @@ from .routes.event import router as event_router
 from .routes.game import router as game_router, active_game_action
 from .routes.player import router as player_router
 
+from .core import get_game_by_id
+
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="staticker/static"), name="static")
@@ -52,7 +54,9 @@ async def app_about(request: Request):
 
 
 @app.get("/data/{obj}")
-async def app_data(request: Request, obj: str, load_all: str = False):
+async def app_data(
+    request: Request, obj: str, load_all: str = False, game_id: int = None
+):
     if obj == "player":
         if load_all:
             pc = PlayerCollection()
@@ -60,10 +64,16 @@ async def app_data(request: Request, obj: str, load_all: str = False):
             return pc.get_names_with_ids()
         else:
             raise (NotImplementedError)
-    elif obj == "active_game":
+    elif obj == "active_game_exists":
         active_game = manager.get_active_game()
         if active_game:
             return active_game.id
+        else:
+            return False
+    elif obj == "game_score":
+        game = get_game_by_id(game_id)
+        if game.id == game_id:
+            return game.get_score()
         else:
             return False
     else:
