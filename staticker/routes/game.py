@@ -41,7 +41,7 @@ async def active_game():
 async def active_game_action(action: str):
     try:
         allowed = ["gbd", "gbo", "gwd", "gwo", "obd", "obo", "owd", "owo"]
-        allowed += [f"{i}_undo" for i in allowed]
+        allowed += [f"undo_{i}" for i in allowed]
         assert action in allowed
     except AssertionError:
         raise HTTPException(status_code=400, detail="Invalid command")
@@ -50,12 +50,10 @@ async def active_game_action(action: str):
 
     if active_game:
         if "undo" in action:
-            raise (NotImplementedError)
+            active_game.undo()
         else:
             active_game.goal_and_owner_by_key(action)
-            # position = action[1:]
-            # player_history = active_game.get_player_history(position)
-            # await arduino.set_leds(position, player_history)
+        await arduino.set_leds(active_game)
     else:
         raise HTTPException(status_code=404, detail="No active game")
 
