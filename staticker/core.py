@@ -57,9 +57,10 @@ class Event(BaseModel):  # TODO Rewrite JsonField? Games now have parent Event I
         return get_multiple_player_by_id(player_ids)
 
     def get_games(self, finished=False):
-        game_ids = self.elements["g"]
-        games = get_multiple_games_by_id(game_ids)
-        return [g for g in games if g.finished]
+        games = get_multiple_games_by_id(self.elements["g"])
+        if finished:
+            games = [g for g in games if g.finished == True]
+        return games
 
     def add_player(self, player):
         if self._is_active():

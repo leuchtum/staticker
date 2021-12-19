@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 
 from ..dependencies import templates
 
-from ..statistics import GlobalStatistics
+from ..statistics import GlobalStatistics, EventStatistics
 from ..collections import PlayerCollection, EventCollection
 from ..core import get_player_by_id, get_event_by_id
 
@@ -50,5 +50,6 @@ async def stats_event_overview(request: Request):
 @router.get("/event/{event_id}", response_class=HTMLResponse)
 async def stats_event(request: Request, event_id: int):
     ev = get_event_by_id(event_id)
-    dic = {"request": request, "event": ev}
+    ev_stat = EventStatistics(ev)
+    dic = {"request": request, "stats": ev_stat.get_formatted_stats(), "event": ev}
     return templates.TemplateResponse("stats-event.html", dic)

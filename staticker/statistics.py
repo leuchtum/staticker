@@ -4,13 +4,8 @@ import numpy as np
 from .core import NotAllowedError
 
 
-class GlobalStatistics:
+class Statistics:
     def __init__(self):
-        self.pc = PlayerCollection()
-        self.pc.load_all()
-        self.gc = GameCollection()
-        self.gc.load_all()
-
         self.stats = {
             p: {
                 "total": 0,
@@ -95,55 +90,32 @@ class GlobalStatistics:
         return return_list
 
 
-class EventStatistics:
-    def __init__(self, event):
-        self.event = event
-
+class GlobalStatistics(Statistics):
+    def __init__(self):
         self.pc = PlayerCollection()
-        self.pc.player = self.event.get_player()
-
+        self.pc.load_all()
         self.gc = GameCollection()
-        self.gc.games = self.event.get_games(finished=True)
+        self.gc.load_all()
+        super().__init__()
 
-        self.ranking = pd.DataFrame(
-            data=[
-                {"player": p, "name": p.name, "name_lower_case": p.name.lower()}
-                for p in self.pc.player
-            ],
-            index=[p.id for p in self.pc.player],
-        )
 
-    def games_played(self):
-        return len(self.event.get_games(finished=True))
-
-    def _count(self):
-        metrics_names = ["played", "won", "lost"]
-
-        zeros = np.zeros((self.ranking.shape[0], len(metrics_names)), dtype=int)
-        metrics = pd.DataFrame(
-            data=zeros, columns=metrics_names, index=self.ranking.index
-        )
-
-        self.ranking = self.ranking.join(metrics)
-
-        for g in self.gc.games:
-            wl = g.get_winner_and_loser()
-            for p in g.get_player():
-                if p in wl["winner"]:
-                    self.ranking.loc[p.id, "played"] += 1
-                    self.ranking.loc[p.id, "won"] += 1
-                elif p in wl["loser"]:
-                    self.ranking.loc[p.id, "played"] += 1
-                    self.ranking.loc[p.id, "lost"] += 1
+class EventStatistics(Statistics):
+    def __init__(self, event):
+        self.pc = PlayerCollection()
+        self.pc.load_from_event(event)
+        self.gc = GameCollection()
+        self.gc.load_from_event(event)
+        super().__init__()
 
     def get_main_ranking(self):
-        self._count()
+        ranking = pd.DataFrame.from_records(self.get_formatted_stats())
+        ranking["name_lower_case"] = ranking["name"].apply(str.lower)
 
-        main_info = ["ranking", "name", "played", "won", "lost"]
-        sort_by = ["won", "lost", "played", "name_lower_case"]
+        sort_by = ["won", "lost", "total", "name_lower_case"]
         ascending = [False, True, False, True]
+        ranking = ranking.sort_values(sort_by, ascending=ascending)
 
-        ranking = self.ranking.sort_values(sort_by, ascending=ascending)
         ranking["ranking"] = range(1, len(ranking) + 1)
 
+        main_info = ["ranking", "name", "total", "won", "lost"]
         return ranking[main_info].to_dict(orient="records")

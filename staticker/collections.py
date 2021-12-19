@@ -9,9 +9,12 @@ class PlayerCollection:
     def load_all(self, sort_by=None):
         self.player = [p for p in Player.select()]
         if sort_by:
-            self.player = self.get_sorted(sort_by)
+            self.player = self.get_sorted()
 
-    def get_sorted(self, sort_by):
+    def load_from_event(self, event):
+        self.player = event.get_player()
+
+    def get_sorted(self):
         self.player.sort(key=lambda p: p.name.lower())
         return self.player
 
@@ -49,6 +52,9 @@ class GameCollection:
 
     def load_all(self):
         self.games = [g for g in Game.select()]
+
+    def load_from_event(self, event, only_finished_games=False):
+        self.games = event.get_games(finished=only_finished_games)
 
 
 class EventCollection:

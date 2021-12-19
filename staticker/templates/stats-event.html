@@ -7,4 +7,114 @@
 <h3><b>Event statistics</b></h3>
 For Event | Type: {{ event.mode }} | from {{ event.created.strftime("%d.%m.%Y %H:%M")
 }}
+
+<h3><b>Games</b></h3>
+
+<table id="stats1" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th class="th-sm">Name
+            </th>
+            <th class="th-sm">Games total
+            </th>
+            <th class="th-sm">Won total
+            </th>
+            <th class="th-sm">Lost total
+            </th>
+            <th class="th-sm">Won relative
+            </th>
+            <th class="th-sm">Lost relative
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats %}
+        <tr>
+            <td>{{ stat["name"] }}</td>
+            <td>{{ stat["total"] }}</td>
+            <td>{{ stat["won"] }}</td>
+            <td>{{ stat["lost"] }}</td>
+            <td>{{ stat["won%"] }}</td>
+            <td>{{ stat["lost%"] }}</td>
+        </tr>
+        {% endfor %}
+</table>
+
+<h3><b>Goals and owners</b></h3>
+
+<table id="stats2" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th class="th-sm">Name
+            </th>
+            <th class="th-sm">Goals shot
+            </th>
+            <th class="th-sm">Owners shot
+            </th>
+            <th class="th-sm">Goals shot per game
+            </th>
+            <th class="th-sm">Owners shot per game
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats %}
+        <tr>
+            <td>{{ stat["name"] }}</td>
+            <td>{{ stat["shot"] }}</td>
+            <td>{{ stat["owner"] }}</td>
+            <td>{{ stat["shot%"] }}</td>
+            <td>{{ stat["owner%"] }}</td>
+        </tr>
+        {% endfor %}
+</table>
+
+<h3><b>Goals by position</b></h3>
+
+<table id="stats3" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th class="th-sm">Name
+            </th>
+            <th class="th-sm">Goals shot (defense)
+            </th>
+            <th class="th-sm">Goals shot (offense)
+            </th>
+            <th class="th-sm">Goals shot (defense) per game
+            </th>
+            <th class="th-sm">Goals shot (offense) per game
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats %}
+        <tr>
+            <td>{{ stat["name"] }}</td>
+            <td>{{ stat["shot_from_defense"] }}</td>
+            <td>{{ stat["shot_from_offense"] }}</td>
+            <td>{{ stat["shot_from_defense%"] }}</td>
+            <td>{{ stat["shot_from_offense%"] }}</td>
+        </tr>
+        {% endfor %}
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#stats1').DataTable({
+            "order": [[4, "desc"]],
+            "searching": false
+        });
+        $('#stats2').DataTable({
+            "order": [[3, "desc"]],
+            "searching": false
+        });
+        $('#stats3').DataTable({
+            "order": [[1, "desc"]],
+            "searching": false
+        });
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
 {% endblock %}
