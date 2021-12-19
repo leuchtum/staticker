@@ -384,9 +384,22 @@ class Game(BaseModel):  # TODO process event
     def get_player(self):
         return list(set([self.pwd, self.pwo, self.pbd, self.pbo]))
 
-    def get_player_history(self, position):
+    def get_player_history(self, player):
+        if not isinstance(player, Player):
+            raise (TypeError)
+
+        keys = []
+        if player == self.pwd:
+            keys.append("wd")
+        if player == self.pwo:
+            keys.append("wo")
+        if player == self.pbd:
+            keys.append("bd")
+        if player == self.pbo:
+            keys.append("bo")
+
         history = self.history.split("_")
-        return [i[0] for i in history if position in i]
+        return [i for i in history if i[1:] in keys]
 
     def get_side_history(self, side):
         history = self.history.split("_")

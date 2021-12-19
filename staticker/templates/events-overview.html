@@ -5,11 +5,11 @@
 {% block content %}
 {% if active_event %}
 <div class="alert alert-warning alert-dismissible" role="alert">
-    <h4 class="alert-heading">There is an active event!</h4>
-    Click <a href="active" class="alert-link">here</a> to show active event.
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
+  <h4 class="alert-heading">There is an active event!</h4>
+  Click <a href="active" class="alert-link">here</a> to show active event.
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
 </div>
 {% endif %}
 
@@ -19,7 +19,8 @@
 <ul>
   {% for ev in events %}
   <li>
-    <a href="id/{{ ev.id }}">Event | Type: {{ ev.mode }} | from {{ ev.created.date() }}</a>
+    <a href="id/{{ ev.id }}">Event | Type: {{ ev.mode }} | from {{ ev.created.strftime("%d.%m.%Y %H:%M")
+      }}</a>
   </li>
   {% endfor %}
 </ul>

@@ -88,7 +88,7 @@ async def new_game_submit(
     try:
         pw = [pwd] if pwd == pwo else [pwd, pwo]
         pb = [pbd] if pbd == pbo else [pbd, pbo]
-        game.add_player(pw, pb)
+        game.add_player(pb, pw)
     except NotAllowedError:
         raise HTTPException(status_code=403, detail="Player only on one side allowed")
 

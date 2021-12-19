@@ -12,7 +12,10 @@
 
 <p><b>Player {{ player.name }}</b></p>
 <p>ID: {{ player.id }}</p>
-<p></p>
+
+<button onclick="location.href='/stats/player/{{ player.id }}'" class="btn btn-primary" type="button">Show more
+    statistics</button>
+
 <p>Played games:</p>
 <ul>
     {% for g in player.played_games() %}

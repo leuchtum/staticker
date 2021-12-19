@@ -10,6 +10,7 @@ from .dependencies import manager, templates
 from .routes.event import router as event_router
 from .routes.game import router as game_router, active_game_action
 from .routes.player import router as player_router
+from .routes.statistics import router as statistics_router
 
 from .core import get_game_by_id
 
@@ -19,6 +20,7 @@ app.mount("/static", StaticFiles(directory="staticker/static"), name="static")
 app.include_router(event_router)
 app.include_router(game_router)
 app.include_router(player_router)
+app.include_router(statistics_router)
 
 
 @app.on_event("startup")

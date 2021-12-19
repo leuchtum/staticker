@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistics event{% endblock %}
+
+{% block content %}
+
+<h3><b>Event statistics</b></h3>
+For Event | Type: {{ event.mode }} | from {{ event.created.strftime("%d.%m.%Y %H:%M")
+}}
+{% endblock %}

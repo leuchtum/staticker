@@ -1,4 +1,4 @@
-from .core import Event, Player, get_player_by_id, get_player_by_name
+from .core import Event, Player, Game, get_player_by_id, get_player_by_name
 from peewee import fn
 
 
@@ -46,6 +46,9 @@ class GameCollection:
 
         formatted_games.sort(key=lambda x: x["created"])
         return formatted_games
+
+    def load_all(self):
+        self.games = [g for g in Game.select()]
 
 
 class EventCollection:
