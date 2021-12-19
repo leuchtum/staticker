@@ -384,8 +384,13 @@ class Game(BaseModel):  # TODO process event
     def get_player(self):
         return list(set([self.pwd, self.pwo, self.pbd, self.pbo]))
 
-    def get_player_history(self, history):
-        pass
+    def get_player_history(self, position):
+        history = self.history.split("_")
+        return [i[0] for i in history if position in i]
+
+    def get_side_history(self, side):
+        history = self.history.split("_")
+        return [i[0] for i in history if side in i]
 
     def get_player_ids(self, side=None):
         b = set((self.pbd.id, self.pbo.id))
