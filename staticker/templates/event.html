@@ -27,7 +27,7 @@
 <button id="createGame" type="button" class="btn btn-success" data-toggle="modal" data-target="#newGameModal">
   Create new game
 </button>
-<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
+<button id="deactivateEvent" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
   Deactivate event
 </button>
 {% endif %}
@@ -207,15 +207,17 @@
   });
 
   function checkForActiveGame() {
-    fetch('/data/active_game')
+    fetch('/data/active_game_exists')
       .then(response => response.json())
       .then(data => {
         if (data) {
           $('#showGame').prop('disabled', false);
           $('#createGame').prop('disabled', 'disabled');
+          $('#deactivateEvent').prop('disabled', 'disabled');
         } else {
           $('#showGame').prop('disabled', 'disabled');
           $('#createGame').prop('disabled', false);
+          $('#deactivateEvent').prop('disabled', false);
         }
       });
   }
