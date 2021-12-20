@@ -4,5 +4,163 @@
 
 {% block content %}
 
-<h3><b>Statistics for {{ player.name }}</b></h3>
+<div class="container">
+    <div class="row ">
+        <div class="col-md-12">
+            <h1 class="text-center">Statistics for {{ player.name }}</h1>
+        </div>
+    </div>
+    
+    
+    <div class="row ">
+        <div class="col-md-12">
+            <h3 class="text-center">Games</h3>
+        </div>
+    </div>
+    <div class="row ">
+        <div class="col-md-12">
+            <div style="height: 300px">
+                <canvas id="pie-games"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="row ">
+        <div class="col-md-12">
+            <h3 class="text-center">Goals and Owners</h3>
+        </div>
+    </div>
+    <div class="row ">
+        <div class="col-md-12">
+            <div style="height: 300px">
+                <canvas id="pie-goals-owners"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row ">
+        <div class="col-md-12">
+            <h3 class="text-center">Side</h3>
+        </div>
+    </div>
+    <div class="row ">
+        <div class="col-md-12">
+            <div style="height: 300px">
+                <canvas id="pie-side"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row ">
+        <div class="col-md-12">
+            <h3 class="text-center">Position</h3>
+        </div>
+    </div>
+    <div class="row ">
+        <div class="col-md-12">
+            <div style="height: 300px">
+                <canvas id="pie-position"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js"
+    integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    new Chart(document.getElementById("pie-games"), {
+        type: 'pie',
+        data: {
+            labels: [
+                "Won ({{ won }} ≙ {{ won_per }}%)",
+                "Lost ({{ lost }} ≙ {{ lost_per }}%)"
+            ],
+            datasets: [{
+                backgroundColor: ["#00cc00", "#ff3333"],
+                data: [
+                    {{ won }},
+                    {{ lost }}
+                ]
+            }]
+        },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+    });
+    
+    new Chart(document.getElementById("pie-goals-owners"), {
+        type: 'pie',
+        data: {
+            labels: [
+                "Goals from defense ({{ shot_defense }} ≙ {{ shot_defense_per }} per game)",
+                "Goals from offense ({{ shot_offense }} ≙ {{ shot_offense_per }} per game)",
+                "Owners from defense ({{ owner_defense }} ≙ {{ owner_defense_per }} per game)",
+                "Owners from offense ({{ owner_offense }} ≙ {{ owner_offense_per }} per game)"
+            ],
+            datasets: [{
+                backgroundColor: ["#00cc00", "#009900", "#ff3333", "#cc0000"],
+                data: [
+                    {{ shot_defense }},
+                    {{ shot_offense }},
+                    {{ owner_defense }},
+                    {{ owner_offense }}
+                ]
+            }]
+        },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+    });
+    
+    new Chart(document.getElementById("pie-side"), {
+        type: 'pie',
+        data: {
+            labels: [
+                "White ({{ played_w }} ≙ {{ played_w_per }}%)",
+                "Black ({{ played_b }} ≙ {{ played_b_per }}%)",
+            ],
+            datasets: [{
+                backgroundColor: ["#cccccc", "#444444"],
+                data: [
+                    {{ played_w }},
+                    {{ played_b }}
+                ]
+            }]
+        },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+    });
+    
+    new Chart(document.getElementById("pie-position"), {
+        type: 'pie',
+        data: {
+            labels: [
+                "Allone ({{ played_allone }} ≙ {{ played_allone_per }}%)",
+                "Offense ({{ played_offense }} ≙ {{ played_offense_per }}%)",
+                "Defense ({{ played_defense }} ≙ {{ played_defense_per }}%)"
+            ],
+            datasets: [{
+                backgroundColor: ["#cccccc", "#999999", "#555555"],
+                data: [
+                    {{ played_allone }},
+                    {{ played_offense }},
+                    {{ played_defense }}
+                ]
+            }]
+        },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+    });
+</script>
 {% endblock %}

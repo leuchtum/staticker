@@ -50,11 +50,17 @@ class GameCollection:
         formatted_games.sort(key=lambda x: x["created"])
         return formatted_games
 
-    def load_all(self):
-        self.games = [g for g in Game.select()]
+    def load_all(self, only_finished_games=False):
+        games = [g for g in Game.select()]
+        if only_finished_games:
+            games = [g for g in games if g.finished]
+        self.games = games
 
     def load_from_event(self, event, only_finished_games=False):
         self.games = event.get_games(finished=only_finished_games)
+
+    def load_from_player(self, player, only_finished_games=False):
+        self.games = player.played_games()
 
 
 class EventCollection:

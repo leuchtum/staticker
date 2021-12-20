@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 
 from ..dependencies import templates
 
-from ..statistics import GlobalStatistics, EventStatistics
+from ..statistics import GlobalStatistics, EventStatistics, PlayerStatistics
 from ..collections import PlayerCollection, EventCollection
 from ..core import get_player_by_id, get_event_by_id
 
@@ -35,7 +35,18 @@ async def stats_player_overview(request: Request):
 @router.get("/player/{player_id}", response_class=HTMLResponse)
 async def stats_player(request: Request, player_id: int):
     player = get_player_by_id(player_id)
+    ps = PlayerStatistics(player)
+    data = ps.get_formatted_stats()
+    renamed_data = {}
+    for key, val in data.items():
+        if "%" in key:
+            old = key[:-1]
+            new = old + "_per"
+            renamed_data[new] = val
+        else:
+            renamed_data[key] = val
     dic = {"request": request, "player": player}
+    dic.update(renamed_data)
     return templates.TemplateResponse("stats-player.html", dic)
 
 
