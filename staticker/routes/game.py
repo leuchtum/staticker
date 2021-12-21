@@ -94,4 +94,6 @@ async def new_game_submit(
 
     ev.add_game(game)
 
+    await arduino.clear_leds()
+
     return RedirectResponse("/game/active", status_code=status.HTTP_302_FOUND)

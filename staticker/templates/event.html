@@ -3,111 +3,142 @@
 {% block title %}Event{% endblock %}
 
 {% block content %}
+<div class="container">
 
-{% if created %}
-<div id="alert_created" class="alert alert-success" role="alert">
-  <h4 class="alert-heading">Event successfully created.</h4>
+  <div class="row ">
+    <div class="col-md-12">
+      {% if created %}
+      <div id="alert_created" class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Event successfully created.</h4>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row ">
+    <div class="col-md-12">
+      <h1>Event</h1>
+    </div>
+  </div>
+
+  <div class="row ">
+    <div class="col-md-12">
+      <p>
+        Event with ID {{ event.id }}, status: {{ "active" if event.active else "not active" }}
+      </p>
+    </div>
+  </div>
+
+
+  <div class="row ">
+    <div class="col-md-12">
+      {% if event.active %}
+      <h4>Control panel</h4>
+      <!-- Button trigger modal -->
+      <button id="deactivateEvent" type="button" class="btn btn-danger" data-toggle="modal"
+        data-target="#deactivateModal">
+        Deactivate event
+      </button>
+      <button id="createGame" type="button" class="btn btn-success" data-toggle="modal" data-target="#newGameModal">
+        Create new game
+      </button>
+      <button onclick="location.href = '/game/active';" id="showGame" type="button" class="btn btn-primary">
+        Show active game
+      </button>
+      {% endif %}
+      <button onclick="location.href='/stats/event/{{ event.id }}'" class="btn btn-primary" type="button">Show more
+        statistics</button>
+    </div>
+  </div>
+
+  <div class="row ">
+    <div class="col-md-12">
+      <h4>Main ranking</h4>
+    </div>
+  </div>
+
+  <div class="row ">
+    <div class="col-md-12">
+      <table class="table align-middle text-center table-responsive-sm">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Played</th>
+            <th scope="col">Won</th>
+            <th scope="col">Lost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in main_ranking %}
+          <tr>
+            <th scope="row">{{ row["ranking"] }}</th>
+            <td>{{ row["name"] }}</td>
+            <td>{{ row["total"] }}</td>
+            <td>{{ row["won"] }}</td>
+            <td>{{ row["lost"] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row ">
+    <div class="col-md-12">
+      <h4>Played games</h4>
+    </div>
+  </div>
+
+  <div class="row ">
+    <div class="col-md-12">
+      <table class="table align-middle text-center table-responsive-sm">
+        <thead>
+          <tr>
+            <th style="width: 45%" scope="col">Black</td>
+            <th style="width: 10%" scope="col">Score</th>
+            <th style="width: 45%" scope="col">White</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in games %}
+          <tr>
+            <td>
+              {% if row["pbd"] == row["pbo"] %}
+              <div>
+                {{ row["pbd"] }}
+              </div>
+              {% else %}
+              <div>
+                DEF: {{ row["pbd"] }}
+              </div>
+              <div>
+                OFF: {{ row["pbo"] }}
+              </div>
+              {% endif %}
+            </td>
+            <td>{{ row["score_b"] }}:{{ row["score_w"] }}</td>
+            <td>
+              {% if row["pwd"] == row["pwo"] %}
+              <div>
+                {{ row["pwd"] }}
+              </div>
+              {% else %}
+              <div>
+                DEF: {{ row["pwd"] }}
+              </div>
+              <div>
+                OFF: {{ row["pwo"] }}
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
-{% endif %}
-
-<h1>Event</h1>
-<p>
-  Event with ID {{ event.id }}, status: {{ "active" if event.active else "not active" }}
-</p>
-
-
-
-{% if event.active %}
-<h4>Control panel</h4>
-
-<!-- Button trigger modal -->
-<button onclick="location.href = '/game/active';" id="showGame" type="button" class="btn btn-primary">
-  Show active game
-</button>
-<button id="createGame" type="button" class="btn btn-success" data-toggle="modal" data-target="#newGameModal">
-  Create new game
-</button>
-<button id="deactivateEvent" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateModal">
-  Deactivate event
-</button>
-{% endif %}
-
-
-<h4>Main ranking</h4>
-
-<table class="table align-middle text-center table-responsive-sm">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Name</th>
-      <th scope="col">Played</th>
-      <th scope="col">Won</th>
-      <th scope="col">Lost</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in main_ranking %}
-    <tr>
-      <th scope="row">{{ row["ranking"] }}</th>
-      <td>{{ row["name"] }}</td>
-      <td>{{ row["total"] }}</td>
-      <td>{{ row["won"] }}</td>
-      <td>{{ row["lost"] }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<button onclick="location.href='/stats/event/{{ event.id }}'" class="btn btn-primary" type="button">Show more
-  statistics</button>
-
-</button>
-<h4>Played games</h4>
-<table class="table align-middle text-center table-responsive-sm">
-  <thead>
-    <tr>
-      <th style="width: 45%" scope="col">Black</td>
-      <th style="width: 10%" scope="col">Score</th>
-      <th style="width: 45%" scope="col">White</td>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in games %}
-    <tr>
-      <td>
-        {% if row["pbd"] == row["pbo"] %}
-        <div>
-          {{ row["pbd"] }}
-        </div>
-        {% else %}
-        <div>
-          DEF: {{ row["pbd"] }}
-        </div>
-        <div>
-          OFF: {{ row["pbo"] }}
-        </div>
-        {% endif %}
-      </td>
-      <td>{{ row["score_b"] }}:{{ row["score_w"] }}</td>
-      <td>
-        {% if row["pwd"] == row["pwo"] %}
-        <div>
-          {{ row["pwd"] }}
-        </div>
-        {% else %}
-        <div>
-          DEF: {{ row["pwd"] }}
-        </div>
-        <div>
-          OFF: {{ row["pwo"] }}
-        </div>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
 
 <!-- Modal deactivate-->
 <div class="modal fade" id="deactivateModal" tabindex="-1" role="dialog">

@@ -8,6 +8,10 @@
 <p>Game with ID {{ game.id }}</p>
 <p>Created at {{ game.created.strftime("%d.%m.%Y %H:%M") }}</p>
 
+<button onclick="location.href='/event/id/{{ game.event.id }}'" class="btn btn-secondary" type="button">Go back to
+    event</button>
+<p></p>
+
 <table class="table align-middle text-center table-responsive-sm">
     <thead>
         <tr>

@@ -386,17 +386,15 @@ class Game(BaseModel):  # TODO process event
         return list(set([self.pwd, self.pwo, self.pbd, self.pbo]))
 
     def get_player_history(self, player):
-        if not isinstance(player, Player):
-            raise (TypeError)
 
         keys = []
-        if player == self.pwd:
+        if player in [self.pwd, "wd"]:
             keys.append("wd")
-        if player == self.pwo:
+        if player in [self.pwo, "wo"]:
             keys.append("wo")
-        if player == self.pbd:
+        if player in [self.pbd, "bd"]:
             keys.append("bd")
-        if player == self.pbo:
+        if player in [self.pbo, "bo"]:
             keys.append("bo")
 
         history = self.history.split("_")

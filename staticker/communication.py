@@ -94,11 +94,11 @@ class ArduinoAsyncSerial:
             g = [0 for _ in range(ARRAYLEN)]
             b = [0 for _ in range(ARRAYLEN)]
             for i, key in enumerate(history):
-                if key == "g":
+                if key[0] == "g":
                     r[i] = int(goal_color[0] * bright)
                     g[i] = int(goal_color[1] * bright)
                     b[i] = int(goal_color[2] * bright)
-                elif key == "o":
+                elif key[0] == "o":
                     r[i] = int(owner_color[0] * bright)
                     g[i] = int(owner_color[1] * bright)
                     b[i] = int(owner_color[2] * bright)
