@@ -80,7 +80,7 @@ class Statistics:
                 if "%" in key:
                     s[key] = round(val, 3)
 
-            s.update({"name": p.name})
+            s.update({"name": p.name, "id": p.id})
             return_list.append(s)
         return return_list
 
@@ -112,7 +112,7 @@ class EventStatistics(Statistics):
 
         ranking["ranking"] = range(1, len(ranking) + 1)
 
-        main_info = ["ranking", "name", "total", "won", "lost"]
+        main_info = ["ranking", "name", "total", "won", "lost", "id"]
         return ranking[main_info].to_dict(orient="records")
 
 

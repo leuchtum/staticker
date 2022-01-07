@@ -27,6 +27,8 @@ app.include_router(statistics_router)
 async def startup_event():
     arduino.set_button_callback(active_game_action)
     await arduino.startup()
+    if arduino.available:
+        await arduino.clear_leds()
 
 
 @app.get("/debug")

@@ -73,7 +73,7 @@
           {% for row in main_ranking %}
           <tr>
             <th scope="row">{{ row["ranking"] }}</th>
-            <td>{{ row["name"] }}</td>
+            <td><a href="/player/id/{{ row['id'] }}">{{ row["name"] }}</a> </td>
             <td>{{ row["total"] }}</td>
             <td>{{ row["won"] }}</td>
             <td>{{ row["lost"] }}</td>
